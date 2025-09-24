@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "es2022",
+    "lib": ["es2022"],
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
+    "erasableSyntaxOnly": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "checkJs": true,
+    "customConditions": ["development"],
+
+    "noEmit": true
+  },
+  "include": ["src", "test", "eslint.config.*", "package.json"],
+  "exclude": ["dist"]
+}
