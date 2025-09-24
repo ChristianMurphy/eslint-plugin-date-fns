@@ -219,6 +219,94 @@ function processAny() {
   return d;
 }
 `,
+
+      // ✅ Valid constant string - ISO format
+      `
+import { parseISO } from 'date-fns';
+function useValidConstant() {
+  const d = parseISO('2023-01-01T10:00:00Z');
+  return d.getTime();
+}
+`,
+
+      // ✅ Valid constant string - ISO date only
+      `
+import { parseISO } from 'date-fns';
+function useValidDateConstant() {
+  const d = parseISO('2023-12-25');
+  return d;
+}
+`,
+
+      // ✅ Valid parse with constant format
+      `
+import { parse } from 'date-fns';
+function useValidParseConstant() {
+  const d = parse('01/15/2023', 'MM/dd/yyyy', new Date());
+  return d.getFullYear();
+}
+`,
+
+      // ✅ Valid const reference - parseISO
+      `
+import { parseISO } from 'date-fns';
+function useValidConstReference() {
+  const DATE_STRING = '2023-06-15T14:30:00Z';
+  const d = parseISO(DATE_STRING);
+  return d;
+}
+`,
+
+      // ✅ Valid const reference - parse
+      `
+import { parse } from 'date-fns';
+function useValidParseConstReference() {
+  const DATE_STRING = '12/25/2023';
+  const FORMAT = 'MM/dd/yyyy';
+  const d = parse(DATE_STRING, FORMAT, new Date());
+  return d.toString();
+}
+`,
+
+      // ✅ Valid template literal (no substitutions)
+      `
+import { parseISO } from 'date-fns';
+function useValidTemplateLiteral() {
+  const d = parseISO(\`2023-03-15T09:00:00Z\`);
+  return d.getTime();
+}
+`,
+
+      // ✅ Template literal with substitutions - should require validation (dynamic)
+      `
+import { parseISO, isValid } from 'date-fns';
+function useTemplateWithSubstitution(year: number) {
+  const d = parseISO(\`\${year}-01-01T00:00:00Z\`);
+  if (!isValid(d)) return null;
+  return d;
+}
+`,
+
+      // ✅ String concatenation - should require validation (dynamic)
+      `
+import { parseISO, isValid } from 'date-fns';
+function useStringConcatenation(month: string) {
+  const d = parseISO('2023-' + month + '-01T00:00:00Z');
+  if (!isValid(d)) return null;
+  return d;
+}
+`,
+
+      // ✅ Mixed scenario - valid constant with other usage
+      `
+import { parseISO, isValid } from 'date-fns';
+function mixedScenario(userInput: string) {
+  const validConstant = parseISO('2023-01-01T00:00:00Z');
+  const userDate = parseISO(userInput);
+  if (!isValid(userDate)) return null;
+  return [validConstant, userDate];
+}
+`,
     ],
 
     invalid: [
@@ -968,6 +1056,206 @@ if (!isValid(d)) {
 }
 
   return [d, 'parsed'];
+}
+`,
+              },
+            ],
+          },
+        ],
+      },
+
+      // ❌ Invalid constant string - parseISO
+      {
+        code: `
+import { parseISO } from 'date-fns';
+function useInvalidConstant() {
+  const d = parseISO('invalid-date-string');
+  return d.getTime();
+}
+`,
+        errors: [
+          {
+            messageId: "invalidConstantString",
+          },
+        ],
+      },
+
+      // ❌ Invalid constant string - malformed ISO
+      {
+        code: `
+import { parseISO } from 'date-fns';
+function useMalformedConstant() {
+  const d = parseISO('2023-13-45T25:99:99Z');
+  return d;
+}
+`,
+        errors: [
+          {
+            messageId: "invalidConstantString",
+          },
+        ],
+      },
+
+      // ❌ Invalid parse with constant format
+      {
+        code: `
+import { parse } from 'date-fns';
+function useInvalidParseConstant() {
+  const d = parse('13/45/2023', 'MM/dd/yyyy', new Date());
+  return d.getFullYear();
+}
+`,
+        errors: [
+          {
+            messageId: "invalidConstantString",
+          },
+        ],
+      },
+
+      // ❌ Invalid const reference - parseISO
+      {
+        code: `
+import { parseISO } from 'date-fns';
+function useInvalidConstReference() {
+  const BAD_DATE = 'not-a-date';
+  const d = parseISO(BAD_DATE);
+  return d.toString();
+}
+`,
+        errors: [
+          {
+            messageId: "invalidConstantString",
+          },
+        ],
+      },
+
+      // ❌ Invalid const reference - parse
+      {
+        code: `
+import { parse } from 'date-fns';
+function useInvalidParseConstReference() {
+  const BAD_DATE = '99/99/9999';
+  const FORMAT = 'MM/dd/yyyy';
+  const d = parse(BAD_DATE, FORMAT, new Date());
+  return d.getTime();
+}
+`,
+        errors: [
+          {
+            messageId: "invalidConstantString",
+          },
+        ],
+      },
+
+      // ❌ Invalid template literal (no substitutions)
+      {
+        code: `
+import { parseISO } from 'date-fns';
+function useInvalidTemplateLiteral() {
+  const d = parseISO(\`invalid-iso-string\`);
+  return d.getTime();
+}
+`,
+        errors: [
+          {
+            messageId: "invalidConstantString",
+          },
+        ],
+      },
+
+      // ❌ Template literal with substitutions - should flag with validation guard (dynamic)
+      {
+        code: `
+import { parseISO } from 'date-fns';
+function useTemplateWithSubstitution(year: number) {
+  const d = parseISO(\`\${year}-01-01T00:00:00Z\`);
+  return d.getTime();
+}
+`,
+        errors: [
+          {
+            messageId: "requireIsValid",
+            suggestions: [
+              {
+                messageId: "suggestGuard",
+                output: `
+import { parseISO } from 'date-fns';
+import { isValid } from 'date-fns';
+function useTemplateWithSubstitution(year: number) {
+  const d = parseISO(\`\${year}-01-01T00:00:00Z\`);
+if (!isValid(d)) {
+  // TODO: handle invalid date
+}
+
+  return d.getTime();
+}
+`,
+              },
+            ],
+          },
+        ],
+      },
+
+      // ❌ String concatenation - should flag with validation guard (dynamic)
+      {
+        code: `
+import { parseISO } from 'date-fns';
+function useStringConcatenation(month: string) {
+  const d = parseISO('2023-' + month + '-01T00:00:00Z');
+  return d.toString();
+}
+`,
+        errors: [
+          {
+            messageId: "requireIsValid",
+            suggestions: [
+              {
+                messageId: "suggestGuard",
+                output: `
+import { parseISO } from 'date-fns';
+import { isValid } from 'date-fns';
+function useStringConcatenation(month: string) {
+  const d = parseISO('2023-' + month + '-01T00:00:00Z');
+if (!isValid(d)) {
+  // TODO: handle invalid date
+}
+
+  return d.toString();
+}
+`,
+              },
+            ],
+          },
+        ],
+      },
+
+      // ❌ Mixed scenario - dynamic part should still require validation
+      {
+        code: `
+import { parseISO } from 'date-fns';
+function mixedScenario(userInput: string) {
+  const validConstant = parseISO('2023-01-01T00:00:00Z');
+  const userDate = parseISO(userInput);
+  return [validConstant, userDate];
+}
+`,
+        errors: [
+          {
+            messageId: "requireIsValid",
+            suggestions: [
+              {
+                messageId: "suggestGuard",
+                output: `
+import { parseISO } from 'date-fns';
+import { isValid } from 'date-fns';
+function mixedScenario(userInput: string) {
+  const validConstant = parseISO('2023-01-01T00:00:00Z');
+  const userDate = parseISO(userInput);
+if (!isValid(userDate)) {
+  // TODO: handle invalid date
+}
+
+  return [validConstant, userDate];
 }
 `,
               },

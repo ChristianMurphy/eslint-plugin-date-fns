@@ -11,5 +11,5 @@
     "allowImportingTsExtensions": false
   },
   "include": ["src", "package.json"],
-  "exclude": ["dist", "tests"]
+  "exclude": ["dist", "test"]
 }

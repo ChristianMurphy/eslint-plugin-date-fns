@@ -1,5 +1,6 @@
-import { ESLintUtils, TSESTree } from "@typescript-eslint/utils";
+import { ESLintUtils, TSESTree, ASTUtils } from "@typescript-eslint/utils";
 import type { TSESLint } from "@typescript-eslint/utils";
+import { parseISO, parse, isValid } from "date-fns";
 import { ensureDateFnsNamedImports } from "../../utils/imports.js";
 
 const createRule = ESLintUtils.RuleCreator(
@@ -8,7 +9,7 @@ const createRule = ESLintUtils.RuleCreator(
 );
 
 type Options = [];
-type MessageIds = "requireIsValid" | "suggestGuard";
+type MessageIds = "requireIsValid" | "suggestGuard" | "invalidConstantString";
 
 /**
  * Checks if callee is an identifier with given name.
@@ -44,6 +45,77 @@ function isIsValidCall(
   return (
     firstArgument !== undefined && getText(firstArgument) === identifierName
   );
+}
+
+/**
+ * Validates a constant string with parseISO and returns the validation result.
+ */
+function validateConstantParseISO(dateString: string): boolean {
+  try {
+    const parsedDate = parseISO(dateString);
+    return isValid(parsedDate);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validates a constant string with parse and returns the validation result.
+ */
+function validateConstantParse(
+  dateString: string,
+  formatString: string,
+): boolean {
+  try {
+    const parsedDate = parse(dateString, formatString, new Date());
+    return isValid(parsedDate);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Attempts to statically evaluate a parse call to determine if the result would be valid.
+ * Returns true if valid, false if invalid, undefined if cannot be statically evaluated.
+ */
+function tryStaticEvaluateParseCall(
+  callNode: TSESTree.CallExpression,
+  scope: TSESLint.Scope.Scope,
+): boolean | undefined {
+  // Handle parseISO(stringArg)
+  if (
+    isIdentifierCallee(callNode.callee, "parseISO") &&
+    callNode.arguments.length > 0
+  ) {
+    const dateStringArgument = callNode.arguments[0];
+    if (!dateStringArgument) return undefined;
+
+    const dateString = ASTUtils.getStringIfConstant(dateStringArgument, scope);
+    if (dateString === null) return undefined;
+
+    return validateConstantParseISO(dateString);
+  }
+
+  // Handle parse(stringArg, formatArg, referenceDate)
+  if (
+    isIdentifierCallee(callNode.callee, "parse") &&
+    callNode.arguments.length >= 2
+  ) {
+    const dateStringArgument = callNode.arguments[0];
+    const formatArgument = callNode.arguments[1];
+    if (!dateStringArgument || !formatArgument) return undefined;
+
+    const dateString = ASTUtils.getStringIfConstant(dateStringArgument, scope);
+    const formatString = ASTUtils.getStringIfConstant(formatArgument, scope);
+
+    if (dateString === null || formatString === null) {
+      return undefined;
+    }
+
+    return validateConstantParse(dateString, formatString);
+  }
+
+  return undefined;
 }
 
 /** Recursively search for isValid(identifierName) calls in any expression */
@@ -160,6 +232,8 @@ export default createRule<Options, MessageIds>({
         "Result of parse/parseISO should be validated with isValid(...) before use.",
       suggestGuard:
         "Add a guard: const {{id}} = {{call}}; if (!isValid({{id}})) { /* handle invalid */ }",
+      invalidConstantString:
+        "Constant string passed to parse/parseISO is invalid and will always produce an invalid Date.",
     },
   },
   defaultOptions: [],
@@ -172,6 +246,25 @@ export default createRule<Options, MessageIds>({
       if (!declarator.init || !isParseCall(declarator.init)) return;
 
       const identifierName = declarator.id.name;
+
+      // Check if we can statically evaluate the parse call
+      const scope = source.getScope(declarator);
+      const staticResult = tryStaticEvaluateParseCall(declarator.init, scope);
+
+      if (staticResult !== undefined) {
+        // We have a constant string - check if it's valid
+        if (!staticResult) {
+          // Invalid constant string - flag with no fix
+          context.report({
+            node: declarator,
+            messageId: "invalidConstantString",
+          });
+        }
+        // If valid constant string, don't flag at all
+        return;
+      }
+
+      // Dynamic string - continue with existing logic
 
       // Declarator must be inside a VariableDeclaration
       const parentDeclaration = declarator.parent;
