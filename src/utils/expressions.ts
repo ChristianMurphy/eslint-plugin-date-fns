@@ -1,13 +1,13 @@
-import type { TSESTree } from "@typescript-eslint/utils";
+import {
+  AST_NODE_TYPES,
+  ASTUtils,
+  type TSESTree,
+} from "@typescript-eslint/utils";
 
 /**
- * Checks if node is an Identifier.
+ * Checks if a node is a Literal node using ASTUtils.
  */
-export function isIdentifier(
-  nodeToCheck: TSESTree.Node,
-): nodeToCheck is TSESTree.Identifier {
-  return nodeToCheck.type === "Identifier";
-}
+export const isLiteral = ASTUtils.isNodeOfType(AST_NODE_TYPES.Literal);
 
 /**
  * Gets single expression argument from call or constructor.

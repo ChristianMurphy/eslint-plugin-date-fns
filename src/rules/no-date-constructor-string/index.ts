@@ -1,7 +1,7 @@
 import { ESLintUtils, TSESTree, TSESLint } from "@typescript-eslint/utils";
 import { isNewDateSyntax, isDateShadowed } from "../../utils/date-call.js";
 import { createImportAndReplaceFix } from "../../utils/fixers.js";
-import { getNodeRange, getFirstArgument } from "../../utils/types.js";
+import { getFirstArgument, getNodeRange } from "../../utils/types.js";
 import { parseISO, isValid } from "date-fns";
 
 const createRule = ESLintUtils.RuleCreator(

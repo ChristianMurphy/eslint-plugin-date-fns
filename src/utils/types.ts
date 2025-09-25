@@ -26,20 +26,6 @@ export function isTypeNumberish(typeToCheck: ts.Type): boolean {
 }
 
 /**
- * Converts null to undefined for consistent API.
- */
-export function nullToUndefined<T>(value: T | null): T | undefined {
-  return value === null ? undefined : value;
-}
-
-/**
- * Gets AST node range as tuple.
- */
-export function getNodeRange(node: TSESTree.Node): [number, number] {
-  return node.range!;
-}
-
-/**
  * Gets first non-spread argument from call or constructor expression.
  */
 export function getFirstArgument(
@@ -47,4 +33,16 @@ export function getFirstArgument(
 ): TSESTree.Expression | undefined {
   const first = node.arguments[0];
   return first && first.type !== "SpreadElement" ? first : undefined;
+}
+
+/**
+ * Safely gets the range from an AST node, throwing an error if not available.
+ */
+export function getNodeRange(node: TSESTree.Node): readonly [number, number] {
+  if (!node.range) {
+    throw new Error(
+      `Node range is not available. This should not happen in a properly configured ESLint environment.`,
+    );
+  }
+  return node.range;
 }

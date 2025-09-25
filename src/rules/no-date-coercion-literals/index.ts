@@ -1,6 +1,6 @@
 import { ESLintUtils } from "@typescript-eslint/utils";
 import { createImportAndReplaceFix } from "../../utils/fixers.js";
-import { isGlobalThisDateCall } from "../../utils/expressions.js";
+import { isGlobalThisDateCall, isLiteral } from "../../utils/expressions.js";
 import { getFirstArgument } from "../../utils/types.js";
 
 const createRule = ESLintUtils.RuleCreator(
@@ -41,7 +41,7 @@ export default createRule<Options, MessageIds>({
 
         const argument = getFirstArgument(node);
         if (!argument) return;
-        if (argument.type === "Literal" && argument.value === null) {
+        if (isLiteral(argument) && argument.value === null) {
           context.report({
             node,
             messageId: "noNull",
@@ -57,7 +57,7 @@ export default createRule<Options, MessageIds>({
           });
           return;
         }
-        if (argument.type === "Literal" && argument.value === true) {
+        if (isLiteral(argument) && argument.value === true) {
           context.report({
             node,
             messageId: "noTrue",
@@ -73,7 +73,7 @@ export default createRule<Options, MessageIds>({
           });
           return;
         }
-        if (argument.type === "Literal" && argument.value === false) {
+        if (isLiteral(argument) && argument.value === false) {
           context.report({
             node,
             messageId: "noFalse",

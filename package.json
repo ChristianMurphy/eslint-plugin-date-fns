@@ -62,7 +62,7 @@
     "typescript-eslint": "^8.0.0"
   },
   "typeCoverage": {
-    "atLeast": 99,
+    "atLeast": 100,
     "detail": true,
     "strict": true,
     "ignoreCatch": false

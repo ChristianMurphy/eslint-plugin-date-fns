@@ -1,37 +1,26 @@
-import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
+import {
+  AST_NODE_TYPES,
+  ASTUtils,
+  type TSESLint,
+  type TSESTree,
+} from "@typescript-eslint/utils";
 import { getNodeRange } from "./types.js";
-
-/**
- * Checks if node is an Identifier.
- */
-function isIdentifier(
-  nodeToCheck: TSESTree.Node,
-): nodeToCheck is TSESTree.Identifier {
-  return nodeToCheck.type === "Identifier";
-}
-
-/**
- * Checks if node is a MemberExpression.
- */
-function isMemberExpression(
-  nodeToCheck: TSESTree.Node,
-): nodeToCheck is TSESTree.MemberExpression {
-  return nodeToCheck.type === "MemberExpression";
-}
 
 /**
  * Detects Date constructor patterns including globalThis.Date.
  */
 export function isNewDateSyntax(node: TSESTree.NewExpression): boolean {
   const { callee } = node;
-  if (isIdentifier(callee)) return callee.name === "Date";
-  if (isMemberExpression(callee)) {
+  if (ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(callee)) {
+    return callee.name === "Date";
+  }
+  if (ASTUtils.isNodeOfType(AST_NODE_TYPES.MemberExpression)(callee)) {
     const object = callee.object;
     const property = callee.property;
     return (
-      isIdentifier(object) &&
+      ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(object) &&
       object.name === "globalThis" &&
-      isIdentifier(property) &&
+      ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(property) &&
       property.name === "Date"
     );
   }
@@ -47,8 +36,15 @@ export function isDateShadowed(
 ): boolean {
   const { callee } = node;
   // globalThis.Date cannot be shadowed
-  if (isMemberExpression(callee)) return false;
-  if (!isIdentifier(callee) || callee.name !== "Date") return false;
+  if (ASTUtils.isNodeOfType(AST_NODE_TYPES.MemberExpression)(callee)) {
+    return false;
+  }
+  if (
+    !ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(callee) ||
+    callee.name !== "Date"
+  ) {
+    return false;
+  }
 
   const sourceCode = context.getSourceCode();
   const scopeManager = sourceCode.scopeManager;
@@ -82,7 +78,12 @@ export function isBareGlobalDateCall(
   const { callee } = node;
 
   // Must be a simple identifier call to "Date"
-  if (!isIdentifier(callee) || callee.name !== "Date") return false;
+  if (
+    !ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(callee) ||
+    callee.name !== "Date"
+  ) {
+    return false;
+  }
 
   const sourceCode = context.getSourceCode();
   const scopeManager = sourceCode.scopeManager;

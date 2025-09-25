@@ -1,4 +1,6 @@
 import {
+  AST_NODE_TYPES,
+  ASTUtils,
   ESLintUtils,
   TSESTree,
   type ParserServices,
@@ -7,10 +9,7 @@ import {
 import * as ts from "typescript";
 import { isTypeNumberish } from "../../utils/types.js";
 import { isNewDateSyntax, isDateShadowed } from "../../utils/date-call.js";
-import {
-  getSingleExpressionArgument,
-  isIdentifier,
-} from "../../utils/expressions.js";
+import { getSingleExpressionArgument } from "../../utils/expressions.js";
 import { createImportAndReplaceFix } from "../../utils/fixers.js";
 
 const createRule = ESLintUtils.RuleCreator(
@@ -149,12 +148,13 @@ export default createRule<Options, MessageIds>({
         if (isTypeNumberish(typeAtLocation)) return true;
       }
 
-      if (isIdentifier(node)) {
+      if (ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(node)) {
         for (const stmt of program.body) {
           if (stmt.type !== "VariableDeclaration") continue;
           for (const decl of stmt.declarations) {
-            if (decl.id.type !== "Identifier" || decl.id.name !== node.name)
+            if (decl.id.type !== "Identifier" || decl.id.name !== node.name) {
               continue;
+            }
 
             const annotation =
               decl.id.typeAnnotation?.type === "TSTypeAnnotation"
@@ -259,7 +259,7 @@ export default createRule<Options, MessageIds>({
           return;
         }
 
-        if (isIdentifier(argument)) {
+        if (ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(argument)) {
           const initValue = sameFileNumberInitializerValue(program, argument);
           if (initValue !== undefined) {
             const expression = source.getText(argument);
