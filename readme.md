@@ -1,5 +1,8 @@
 # eslint-plugin-date-fns
 
+[![npm](https://img.shields.io/npm/v/eslint-plugin-date-fns.svg)](https://www.npmjs.com/package/eslint-plugin-date-fns)
+[![main](https://github.com/ChristianMurphy/eslint-plugin-date-fns/actions/workflows/main.yml/badge.svg)](https://github.com/ChristianMurphy/eslint-plugin-date-fns/actions/workflows/main.yml)
+
 Date handling lint rules that steer JavaScript/TypeScript code toward clarity and safety by preferring date-fns over ambiguous Date constructor usage.
 
 Designed for ESLint v9 (flat config), TypeScript (via typescript-eslint), Node 22+, and ESM projects.
