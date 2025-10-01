@@ -1,5 +1,6 @@
 import rules from "./rules/index.js";
 import recommendedRules from "./configs/recommended.js";
+import diagnosticRules from "./configs/diagnostic.js";
 import package_ from "../package.json" with { type: "json" };
 
 /**
@@ -19,6 +20,10 @@ plugin.configs = {
   recommended: {
     plugins: { "date-fns": plugin },
     rules: recommendedRules,
+  },
+  diagnostic: {
+    plugins: { "date-fns": plugin },
+    rules: diagnosticRules,
   },
 };
 
