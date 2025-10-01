@@ -1,7 +1,8 @@
 import type { Linter } from "eslint";
 
 /**
- * Recommended rule configuration that enables all date-fns rules as errors.
+ * Recommended rule configuration that enables core date-fns rules as errors.
+ * These rules prevent common date handling bugs and enforce safe patterns.
  */
 const recommendedRules: Linter.RulesRecord = {
   "date-fns/no-date-constructor-string": "error",
