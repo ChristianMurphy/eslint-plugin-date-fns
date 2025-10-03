@@ -1,13 +1,13 @@
 import test from "node:test";
 import { ESLintUtils } from "@typescript-eslint/utils";
-import { tester } from "./_setup.ts";
+import { tester } from "../_setup.ts";
 import {
   getIdentifierHints,
   getCommentHints,
   IDENTIFIER_TIME_KEYWORDS,
   COMMENT_TIME_KEYWORDS,
   CONSTANT_NAME_PATTERN,
-} from "../dist/rules/no-magic-time/hints.js";
+} from "../../dist/rules/no-magic-time/hints.js";
 
 const createRule = ESLintUtils.RuleCreator(
   (name) => `https://github.com/test/${name}.md`,

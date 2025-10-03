@@ -1,6 +1,6 @@
 import test from "node:test";
-import { tester } from "./_setup.ts";
-import rule from "../dist/rules/prefer-iso-literal-over-components/index.js";
+import { tester } from "../_setup.ts";
+import rule from "../../dist/rules/prefer-iso-literal-over-components/index.js";
 
 // Test cases for prefer-iso-literal-over-components rule
 // Tests conversion of multi-argument Date constructors to ISO literals via parseISO

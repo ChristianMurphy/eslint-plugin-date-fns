@@ -93,6 +93,7 @@ These rules prevent common date handling bugs and enforce safe patterns.
 | no-bare-date-call | Forbid bare `Date()` string call | None | `format(new Date(), ...)` patterns | Prevent string coercion | [docs](./docs/rules/no-bare-date-call.md) |
 | no-date-coercion-literals | Forbid `new Date(null)` and `new Date(true/false)` | All cases | None | Safe literal conversion | [docs](./docs/rules/no-date-coercion-literals.md) |
 | no-date-constructor-string | Forbids `new Date(string)` and `Date.parse(string)` | ISO literals to `parseISO()` | Variables get suggestions | Prefer `parseISO` or `parse` | [docs](./docs/rules/no-date-constructor-string.md) |
+| no-date-mutation | Forbid in-place Date mutation (setter methods) | Most cases | UTC/local mismatch | Enforce immutability | [docs](./docs/rules/no-date-mutation.md) |
 | no-legacy-year-components | Forbid `new Date(y, ...)` with `0 ≤ y ≤ 99` (1900+ quirk) | None | 4-digit year via `parseISO()` | Avoid century ambiguity | [docs](./docs/rules/no-legacy-year-components.md) |
 | prefer-date-fns-from-epoch | Prefer `fromUnixTime(sec)` over `new Date(number)` | Numeric literals | Variables get suggestions | Safe epoch conversion | [docs](./docs/rules/prefer-date-fns-from-epoch.md) |
 | prefer-iso-literal-over-components | Replace `new Date(y, m, d, ...)` (all numeric literals) | All-literal calls | Mixed literal/variable calls | UTC ISO format | [docs](./docs/rules/prefer-iso-literal-over-components.md) |

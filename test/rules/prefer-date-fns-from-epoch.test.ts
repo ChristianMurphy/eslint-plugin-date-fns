@@ -1,6 +1,6 @@
 import test from "node:test";
-import { tester } from "./_setup.ts";
-import rule from "../dist/rules/prefer-date-fns-from-epoch/index.js";
+import { tester } from "../_setup.ts";
+import rule from "../../dist/rules/prefer-date-fns-from-epoch/index.js";
 
 // Test cases for prefer-date-fns-from-epoch rule
 // Tests epoch timestamp detection and conversion to fromUnixTime/toDate
@@ -173,10 +173,10 @@ test("prefer-date-fns-from-epoch", () => {
         ],
       },
 
-      // Ensure we add a second top-level import line if one already exists (no merging yet)
+      // Merges into existing date-fns import
       {
         code: `import { format } from 'date-fns'; const d = new Date(1726700000000);`,
-        output: `import { format } from 'date-fns';\nimport { toDate } from 'date-fns';\nconst d = toDate(1726700000000);`,
+        output: `import { format, toDate } from 'date-fns'; const d = toDate(1726700000000);`,
         errors: [{ messageId: "preferToDate" }],
       },
 

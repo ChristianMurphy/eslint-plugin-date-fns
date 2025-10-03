@@ -324,9 +324,12 @@ export default createRule<Options, MessageIds>({
               data: { id: identifierName, call: callText },
               fix(fixer): TSESLint.RuleFix[] {
                 const fixes: TSESLint.RuleFix[] = [];
-                fixes.push(
-                  ensureDateFnsNamedImports(context, fixer, ["isValid"]),
-                );
+                const importFix = ensureDateFnsNamedImports(context, fixer, [
+                  "isValid",
+                ]);
+                if (importFix) {
+                  fixes.push(importFix);
+                }
                 const newText = `const ${identifierName} = ${callText};
 if (!isValid(${identifierName})) {
   // TODO: handle invalid date

@@ -1,6 +1,6 @@
 import test from "node:test";
-import { tester } from "./_setup.ts";
-import rule from "../dist/rules/require-isvalid-after-parse/index.js";
+import { tester } from "../_setup.ts";
+import rule from "../../dist/rules/require-isvalid-after-parse/index.js";
 
 // Test cases for require-isvalid-after-parse rule
 // Tests enforcement of isValid() checks after parse/parseISO before date usage
@@ -326,8 +326,7 @@ function f(s: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function f(s: string) {
   const d = parseISO(s);
 if (!isValid(d)) {
@@ -359,8 +358,7 @@ function getTime(s: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function getTime(s: string) {
   const d = parseISO(s);
 if (!isValid(d)) {
@@ -393,8 +391,7 @@ function store(s: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function store(s: string) {
   const d = parseISO(s);
 if (!isValid(d)) {
@@ -427,8 +424,7 @@ function createObj(s: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function createObj(s: string) {
   const d = parseISO(s);
 if (!isValid(d)) {
@@ -460,8 +456,7 @@ function addToArray(s: string, arr: Date[]) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function addToArray(s: string, arr: Date[]) {
   const d = parseISO(s);
 if (!isValid(d)) {
@@ -493,8 +488,7 @@ function formatDate(s: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO, format } from 'date-fns';
-import { isValid } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
 function formatDate(s: string) {
   const d = parseISO(s);
 if (!isValid(d)) {
@@ -526,8 +520,7 @@ function conditionalUse(s: string, useDate: boolean) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function conditionalUse(s: string, useDate: boolean) {
   const d = parseISO(s);
 if (!isValid(d)) {
@@ -559,8 +552,7 @@ function parseWithFormat(s: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parse } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parse } from 'date-fns';
 function parseWithFormat(s: string) {
   const d = parse(s, 'yyyy-MM-dd', new Date());
 if (!isValid(d)) {
@@ -593,8 +585,7 @@ function multiUse(s: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function multiUse(s: string) {
   const d = parseISO(s);
 if (!isValid(d)) {
@@ -629,8 +620,7 @@ function processInLoop(strings: string[]) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function processInLoop(strings: string[]) {
   for (const s of strings) {
     const d = parseISO(s);
@@ -667,8 +657,7 @@ class Processor {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 class Processor {
   handle(s: string) {
     const d = parseISO(s);
@@ -706,8 +695,7 @@ function outer(s: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function outer(s: string) {
   const d = parseISO(s);
 if (!isValid(d)) {
@@ -784,8 +772,7 @@ function complex(s: string, flag: boolean) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function complex(s: string, flag: boolean) {
   const d = parseISO(s);
 if (!isValid(d)) {
@@ -818,8 +805,7 @@ function destructure(s: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function destructure(s: string) {
   const d = parseISO(s);
 if (!isValid(d)) {
@@ -889,8 +875,7 @@ function multipleViolations(s1: string, s2: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function multipleViolations(s1: string, s2: string) {
   const d1 = parseISO(s1);
 if (!isValid(d1)) {
@@ -910,8 +895,7 @@ if (!isValid(d1)) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function multipleViolations(s1: string, s2: string) {
   const d1 = parseISO(s1);
   const d2 = parseISO(s2);
@@ -944,8 +928,7 @@ function handleUnknown(input: unknown) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function handleUnknown(input: unknown) {
   const d = parseISO(input as string);
 if (!isValid(d)) {
@@ -977,8 +960,7 @@ function handleAny(input: any) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function handleAny(input: any) {
   const d = parseISO(input);
 if (!isValid(d)) {
@@ -1011,8 +993,7 @@ function processUnknown() {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 declare const unknownValue: unknown;
 function processUnknown() {
   const d = parseISO(unknownValue as string);
@@ -1046,8 +1027,7 @@ function processAny() {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 declare const anyValue: any;
 function processAny() {
   const d = parseISO(anyValue);
@@ -1179,8 +1159,7 @@ function useTemplateWithSubstitution(year: number) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function useTemplateWithSubstitution(year: number) {
   const d = parseISO(\`\${year}-01-01T00:00:00Z\`);
 if (!isValid(d)) {
@@ -1212,8 +1191,7 @@ function useStringConcatenation(month: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function useStringConcatenation(month: string) {
   const d = parseISO('2023-' + month + '-01T00:00:00Z');
 if (!isValid(d)) {
@@ -1246,8 +1224,7 @@ function mixedScenario(userInput: string) {
               {
                 messageId: "suggestGuard",
                 output: `
-import { parseISO } from 'date-fns';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 function mixedScenario(userInput: string) {
   const validConstant = parseISO('2023-01-01T00:00:00Z');
   const userDate = parseISO(userInput);

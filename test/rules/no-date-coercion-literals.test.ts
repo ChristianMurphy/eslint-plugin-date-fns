@@ -1,6 +1,6 @@
 import test from "node:test";
-import { tester } from "./_setup.ts";
-import rule from "../dist/rules/no-date-coercion-literals/index.js";
+import { tester } from "../_setup.ts";
+import rule from "../../dist/rules/no-date-coercion-literals/index.js";
 
 // Test cases for no-date-coercion-literals rule
 // Tests prevention of boolean and null literal coercion in Date constructor
@@ -79,12 +79,12 @@ test("no-date-coercion-literals", () => {
       // ❌ Import integration - existing date-fns imports
       {
         code: `import { format } from 'date-fns'; const d = new Date(null);`,
-        output: `import { format } from 'date-fns';\nimport { parseISO } from 'date-fns';\nconst d = parseISO('1970-01-01T00:00:00Z');`,
+        output: `import { format, parseISO } from 'date-fns'; const d = parseISO('1970-01-01T00:00:00Z');`,
         errors: [{ messageId: "noNull", suggestions: [] }],
       },
       {
         code: `import { addDays } from 'date-fns'; const d = new Date(true);`,
-        output: `import { addDays } from 'date-fns';\nimport { parseISO } from 'date-fns';\nconst d = parseISO('1970-01-01T00:00:00.001Z');`,
+        output: `import { addDays, parseISO } from 'date-fns'; const d = parseISO('1970-01-01T00:00:00.001Z');`,
         errors: [{ messageId: "noTrue", suggestions: [] }],
       },
 
