@@ -7,7 +7,7 @@ import {
 import { getNodeRange } from "./types.js";
 
 /**
- * Detects Date constructor patterns including globalThis.Date.
+ * Detects Date constructor patterns including globalThis.Date and globalThis['Date'].
  */
 export function isNewDateSyntax(node: TSESTree.NewExpression): boolean {
   const { callee } = node;
@@ -17,12 +17,24 @@ export function isNewDateSyntax(node: TSESTree.NewExpression): boolean {
   if (ASTUtils.isNodeOfType(AST_NODE_TYPES.MemberExpression)(callee)) {
     const object = callee.object;
     const property = callee.property;
-    return (
+    // Check for globalThis.Date (dot notation)
+    if (
       ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(object) &&
       object.name === "globalThis" &&
       ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(property) &&
       property.name === "Date"
-    );
+    ) {
+      return true;
+    }
+    // Check for globalThis['Date'] (computed property with string literal)
+    if (
+      ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(object) &&
+      object.name === "globalThis" &&
+      ASTUtils.isNodeOfType(AST_NODE_TYPES.Literal)(property) &&
+      property.value === "Date"
+    ) {
+      return true;
+    }
   }
   return false;
 }

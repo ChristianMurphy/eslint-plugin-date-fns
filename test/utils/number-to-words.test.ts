@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   numberToWords,
   labelToConstantName,
-} from "../dist/rules/no-magic-time/number-to-words.js";
+} from "../../dist/rules/no-magic-time/number-to-words.js";
 
 describe("numberToWords", () => {
   describe("basic numbers (0-19)", () => {

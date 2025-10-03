@@ -12,6 +12,7 @@ const recommendedRules: Linter.RulesRecord = {
   "date-fns/no-bare-date-call": "error",
   "date-fns/no-legacy-year-components": "error",
   "date-fns/require-isvalid-after-parse": "error",
+  "date-fns/no-date-mutation": "error",
 };
 
 export default recommendedRules;

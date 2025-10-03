@@ -1,7 +1,7 @@
 // tests/no-legacy-year-components.test.ts
 import test from "node:test";
-import { tester } from "./_setup.ts";
-import rule from "../dist/rules/no-legacy-year-components/index.js";
+import { tester } from "../_setup.ts";
+import rule from "../../dist/rules/no-legacy-year-components/index.js";
 
 // Test cases for no-legacy-year-components rule
 // Tests detection of ambiguous 2-digit years (0-99) that map to 1900+year
@@ -281,7 +281,7 @@ test("no-legacy-year-components", () => {
               {
                 messageId: "suggestParseIso",
                 data: { iso: "0090-05-01T00:00:00.000Z" },
-                output: `import { format } from 'date-fns';\nimport { parseISO } from 'date-fns';\nconst d = parseISO('0090-05-01T00:00:00.000Z');`,
+                output: `import { format, parseISO } from 'date-fns'; const d = parseISO('0090-05-01T00:00:00.000Z');`,
               },
             ],
           },

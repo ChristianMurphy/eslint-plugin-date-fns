@@ -6,6 +6,7 @@ import noBareDateCall from "./no-bare-date-call/index.js";
 import noLegacyYearComponents from "./no-legacy-year-components/index.js";
 import requireIsvalidAfterParse from "./require-isvalid-after-parse/index.js";
 import noMagicTime from "./no-magic-time/index.js";
+import noDateMutation from "./no-date-mutation/index.js";
 
 /**
  * Registry of all available ESLint rules provided by this plugin.
@@ -19,4 +20,5 @@ export default {
   "no-legacy-year-components": noLegacyYearComponents,
   "require-isvalid-after-parse": requireIsvalidAfterParse,
   "no-magic-time": noMagicTime,
+  "no-date-mutation": noDateMutation,
 };

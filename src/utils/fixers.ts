@@ -14,8 +14,10 @@ export function createImportAndReplaceFix<
   node: TSESTree.Node,
   replacement: string,
 ): TSESLint.RuleFix[] {
-  return [
-    ensureDateFnsNamedImports(context, fixer, imports),
-    fixer.replaceText(node, replacement),
-  ];
+  const importFix = ensureDateFnsNamedImports(context, fixer, imports);
+  const fixes = [fixer.replaceText(node, replacement)];
+  if (importFix) {
+    fixes.unshift(importFix);
+  }
+  return fixes;
 }

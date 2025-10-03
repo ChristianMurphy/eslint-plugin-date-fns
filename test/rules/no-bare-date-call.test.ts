@@ -1,6 +1,6 @@
 import test from "node:test";
-import { tester } from "./_setup.ts";
-import rule from "../dist/rules/no-bare-date-call/index.js";
+import { tester } from "../_setup.ts";
+import rule from "../../dist/rules/no-bare-date-call/index.js";
 
 // Test cases for no-bare-date-call rule
 // Focuses on preventing Date() string coercion and suggesting format() alternatives
@@ -171,7 +171,7 @@ test("no-bare-date-call", () => {
             suggestions: [
               {
                 messageId: "suggestFormat",
-                output: `import { addDays } from 'date-fns';\nimport { format } from 'date-fns';\nconst s = format(new Date(), 'yyyy-MM-dd');`,
+                output: `import { addDays, format } from 'date-fns'; const s = format(new Date(), 'yyyy-MM-dd');`,
               },
             ],
           },

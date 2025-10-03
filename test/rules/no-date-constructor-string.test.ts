@@ -1,6 +1,6 @@
 import test from "node:test";
-import { tester } from "./_setup.ts";
-import rule from "../dist/rules/no-date-constructor-string/index.js";
+import { tester } from "../_setup.ts";
+import rule from "../../dist/rules/no-date-constructor-string/index.js";
 
 // Test cases for no-date-constructor-string rule
 // Tests string literal autofixes, variable suggestions, and edge cases

@@ -1,6 +1,6 @@
 import test from "node:test";
-import { tester } from "./_setup.ts";
-import rule from "../dist/rules/no-magic-time/index.js";
+import { tester } from "../_setup.ts";
+import rule from "../../dist/rules/no-magic-time/index.js";
 
 // Test cases for no-magic-time rule
 // Detects and scores numeric literals that are likely date/time calculations
