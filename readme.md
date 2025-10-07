@@ -95,6 +95,7 @@ These rules prevent common date handling bugs and enforce safe patterns.
 | no-date-constructor-string | Forbids `new Date(string)` and `Date.parse(string)` | ISO literals to `parseISO()` | Variables get suggestions | Prefer `parseISO` or `parse` | [docs](./docs/rules/no-date-constructor-string.md) |
 | no-date-mutation | Forbid in-place Date mutation (setter methods) | Most cases | UTC/local mismatch | Enforce immutability | [docs](./docs/rules/no-date-mutation.md) |
 | no-legacy-year-components | Forbid `new Date(y, ...)` with `0 ≤ y ≤ 99` (1900+ quirk) | None | 4-digit year via `parseISO()` | Avoid century ambiguity | [docs](./docs/rules/no-legacy-year-components.md) |
+| no-plain-boundary-math | Forbid manual boundary calculations (setHours, etc.) | Most patterns | Variables/complex expressions | Use `startOfDay`, `endOfMonth`, etc. | [docs](./docs/rules/no-plain-boundary-math.md) |
 | prefer-date-fns-from-epoch | Prefer `fromUnixTime(sec)` over `new Date(number)` | Numeric literals | Variables get suggestions | Safe epoch conversion | [docs](./docs/rules/prefer-date-fns-from-epoch.md) |
 | prefer-iso-literal-over-components | Replace `new Date(y, m, d, ...)` (all numeric literals) | All-literal calls | Mixed literal/variable calls | UTC ISO format | [docs](./docs/rules/prefer-iso-literal-over-components.md) |
 | require-isvalid-after-parse | Require checking `isValid(x)` after `parse/parseISO` before use | None | Validation guard patterns | Prevent invalid date bugs | [docs](./docs/rules/require-isvalid-after-parse.md) |

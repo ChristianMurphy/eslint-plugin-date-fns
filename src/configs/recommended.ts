@@ -13,6 +13,7 @@ const recommendedRules: Linter.RulesRecord = {
   "date-fns/no-legacy-year-components": "error",
   "date-fns/require-isvalid-after-parse": "error",
   "date-fns/no-date-mutation": "error",
+  "date-fns/no-plain-boundary-math": "error",
 };
 
 export default recommendedRules;

@@ -7,6 +7,7 @@ import noLegacyYearComponents from "./no-legacy-year-components/index.js";
 import requireIsvalidAfterParse from "./require-isvalid-after-parse/index.js";
 import noMagicTime from "./no-magic-time/index.js";
 import noDateMutation from "./no-date-mutation/index.js";
+import noPlainBoundaryMath from "./no-plain-boundary-math/index.js";
 
 /**
  * Registry of all available ESLint rules provided by this plugin.
@@ -21,4 +22,5 @@ export default {
   "require-isvalid-after-parse": requireIsvalidAfterParse,
   "no-magic-time": noMagicTime,
   "no-date-mutation": noDateMutation,
+  "no-plain-boundary-math": noPlainBoundaryMath,
 };
