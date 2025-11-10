@@ -791,7 +791,7 @@ export default createRule<Options, MessageIds>({
       } else if (type === "field") {
         const tzOption = isUTC ? `, { in: tz('UTC') }` : "";
 
-        // Phase 4b: Use pre-assigned temp variable if argument has side effects
+        // Use pre-assigned temp variable if argument has side effects
         const temporaryVariableName = mutation.tempVarName; // Pre-assigned in Program:exit
         const effectiveArgumentText =
           temporaryVariableName || mutation.argumentText;
@@ -838,7 +838,7 @@ export default createRule<Options, MessageIds>({
       const isUTC = first.isUTC;
       const tzOption = isUTC ? `, { in: tz('UTC') }` : "";
 
-      // Phase 4b: Use pre-assigned temp variables for side effects
+      // Use pre-assigned temp variables for side effects
       const temporaryVariableMap = new Map<string, string>(); // maps argumentText to temp var name
       const mutationsWithTemps = group.map((m) => {
         if (m.tempVarName && m.argumentText) {
