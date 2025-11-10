@@ -58,12 +58,6 @@ const DATE_SETTERS = new Set([
 // Time constants in milliseconds
 const MS_PER_DAY = 86_400_000;
 
-export interface RuleOptions {
-  weekStartsOn?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-  detectHacks?: boolean;
-  suggestOnlyForAmbiguity?: boolean;
-  endOfDayHeuristic?: EndOfDayHeuristic;
-}
 
 export default createRule<Options, MessageIds>({
   name: "no-plain-boundary-math",
