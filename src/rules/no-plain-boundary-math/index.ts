@@ -147,14 +147,6 @@ export default createRule<Options, MessageIds>({
       },
     ],
   },
-  defaultOptions: [
-    {
-      weekStartsOn: 1,
-      detectHacks: true,
-      suggestOnlyForAmbiguity: true,
-      endOfDayHeuristic: "lenient",
-    },
-  ],
   create(context, [options]) {
     const sourceCode = context.sourceCode;
     const services = ESLintUtils.getParserServices(context);
