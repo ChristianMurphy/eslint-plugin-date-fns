@@ -58,7 +58,6 @@ const DATE_SETTERS = new Set([
 // Time constants in milliseconds
 const MS_PER_DAY = 86_400_000;
 
-
 export default createRule<Options, MessageIds>({
   name: "no-plain-boundary-math",
   meta: {
@@ -147,6 +146,14 @@ export default createRule<Options, MessageIds>({
       },
     ],
   },
+  defaultOptions: [
+    {
+      weekStartsOn: 1,
+      detectHacks: true,
+      suggestOnlyForAmbiguity: true,
+      endOfDayHeuristic: "lenient",
+    },
+  ],
   create(context, [options]) {
     const sourceCode = context.sourceCode;
     const services = ESLintUtils.getParserServices(context);
