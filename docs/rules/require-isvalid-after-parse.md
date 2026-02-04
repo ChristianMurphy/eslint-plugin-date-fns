@@ -132,7 +132,49 @@ function quickFormat(dateStr) {
 function directUse(input) {
   return isValid(parseISO(input)) ? parseISO(input) : null;
 }
+
+// Assertion-based validation in tests
+function testDateParsing(input, referenceDate) {
+  const date = parseISO(input);
+  expect(isValid(date)).toBe(true);  // Validates before subsequent usage
+  expect(differenceInDays(date, referenceDate)).toBe(7);
+  expect(date.getFullYear()).toBe(2025);
+}
+
+// Node.js assert() validation
+function processWithAssert(input) {
+  const date = parseISO(input);
+  assert(isValid(date));  // Throws if invalid
+  return date.toISOString();
+}
+
+// Chai-style assertion
+function testWithChai(input) {
+  const date = parseISO(input);
+  expect(isValid(date)).to.be.true;
+  return format(date, 'yyyy-MM-dd');
+}
 ```
+
+### Assertion Patterns
+
+The rule recognizes assertion-based validation commonly used in tests. These patterns count as valid guards when they assert the date **is** valid:
+
+**✅ Valid assertion patterns (count as validation):**
+- `expect(isValid(date)).toBe(true)`
+- `expect(isValid(date)).toBeTruthy()`
+- `expect(isValid(date)).toEqual(true)`
+- `expect(isValid(date)).toStrictEqual(true)`
+- `expect(isValid(date)).to.be.true` (Chai-style)
+- `assert(isValid(date))`
+- `assert.ok(isValid(date))`
+
+**❌ Invalid assertion patterns (do NOT count as validation):**
+- `expect(isValid(date)).toBe(false)` - asserting invalid, not validating
+- `expect(isValid(date)).toBeFalsy()` - asserting invalid
+- `expect(isValid(date)).toEqual(false)` - asserting invalid
+- `expect(isValid(date)).toStrictEqual(false)` - asserting invalid
+- `expect(isValid(date)).to.be.false` (Chai-style) - asserting invalid
 
 ## Suggestion Behavior
 

@@ -162,6 +162,86 @@ function checkValid(s: string): boolean {
 }
 `,
 
+      // ✅ Assertion validation in test - isValid called before date usage
+      `
+import { parseISO, isValid, differenceInDays } from 'date-fns';
+declare function expect(value: unknown): { toBe(expected: unknown): void };
+function testDateOffset(input: string, referenceDate: Date) {
+  const resultDate = parseISO(input);
+  expect(isValid(resultDate)).toBe(true);
+  expect(differenceInDays(resultDate, referenceDate)).toBe(7);
+  expect(resultDate.getDate()).toBe(22);
+  expect(resultDate.getMonth()).toBe(5);
+  expect(resultDate.getFullYear()).toBe(2025);
+}
+`,
+
+      // ✅ Node assert() validation
+      `
+import { parseISO, isValid } from 'date-fns';
+declare function assert(value: unknown): asserts value;
+function processDate(input: string) {
+  const d = parseISO(input);
+  assert(isValid(d));
+  return d.getTime();
+}
+`,
+
+      // ✅ assert.ok() validation
+      `
+import { parseISO, isValid } from 'date-fns';
+declare const assert: { ok(value: unknown): asserts value };
+function processDate(input: string) {
+  const d = parseISO(input);
+  assert.ok(isValid(d));
+  return d.toISOString();
+}
+`,
+
+      // ✅ Chai-style deep chained assertion - to.be.true
+      `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { to: { be: { true: void } } };
+function testDate(input: string) {
+  const d = parseISO(input);
+  expect(isValid(d)).to.be.true;
+  return d.getFullYear();
+}
+`,
+
+      // ✅ toBeTruthy() style assertion
+      `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toBeTruthy(): void };
+function testDate(input: string) {
+  const d = parseISO(input);
+  expect(isValid(d)).toBeTruthy();
+  return d.getMonth();
+}
+`,
+
+      // ✅ toEqual(true) style assertion
+      `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toEqual(expected: unknown): void };
+function testDate(input: string) {
+  const d = parseISO(input);
+  expect(isValid(d)).toEqual(true);
+  return d.getDate();
+}
+`,
+
+      // ✅ toStrictEqual(true) style assertion
+      `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toStrictEqual(expected: unknown): void };
+function testDate(input: string) {
+  const d = parseISO(input);
+  expect(isValid(d)).toStrictEqual(true);
+  return d.getHours();
+}
+`,
+
       // ✅ Complex logical validation
       `
 import { parseISO, isValid } from 'date-fns';
@@ -1233,6 +1313,270 @@ if (!isValid(userDate)) {
 }
 
   return [validConstant, userDate];
+}
+`,
+              },
+            ],
+          },
+        ],
+      },
+
+      // ❌ Using parsed date before validation - isValid check after date methods
+      {
+        code: `
+import { parseISO, isValid, differenceInDays } from 'date-fns';
+function getDateOffset(input: string, referenceDate: Date) {
+  const result = parseISO(input);
+  const daysDiff = differenceInDays(result, referenceDate);
+  const day = result.getDate();
+  const month = result.getMonth();
+  const year = result.getFullYear();
+  const valid = isValid(result);
+  return { daysDiff, day, month, year, valid };
+}
+`,
+        errors: [
+          {
+            messageId: "requireIsValid",
+            suggestions: [
+              {
+                messageId: "suggestGuard",
+                output: `
+import { parseISO, isValid, differenceInDays } from 'date-fns';
+function getDateOffset(input: string, referenceDate: Date) {
+  const result = parseISO(input);
+if (!isValid(result)) {
+  // TODO: handle invalid date
+}
+
+  const daysDiff = differenceInDays(result, referenceDate);
+  const day = result.getDate();
+  const month = result.getMonth();
+  const year = result.getFullYear();
+  const valid = isValid(result);
+  return { daysDiff, day, month, year, valid };
+}
+`,
+              },
+            ],
+          },
+        ],
+      },
+
+      // ❌ Using isValid in assertion after date usage - validation comes too late
+      {
+        code: `
+import { parseISO, isValid, differenceInDays } from 'date-fns';
+declare function expect(value: unknown): { toBe(expected: unknown): void };
+function testDateOffset(input: string, referenceDate: Date) {
+  const resultDate = parseISO(input);
+  expect(differenceInDays(resultDate, referenceDate)).toBe(7);
+  expect(resultDate.getDate()).toBe(22);
+  expect(resultDate.getMonth()).toBe(5);
+  expect(resultDate.getFullYear()).toBe(2025);
+  expect(isValid(resultDate)).toBe(true);
+}
+`,
+        errors: [
+          {
+            messageId: "requireIsValid",
+            suggestions: [
+              {
+                messageId: "suggestGuard",
+                output: `
+import { parseISO, isValid, differenceInDays } from 'date-fns';
+declare function expect(value: unknown): { toBe(expected: unknown): void };
+function testDateOffset(input: string, referenceDate: Date) {
+  const resultDate = parseISO(input);
+if (!isValid(resultDate)) {
+  // TODO: handle invalid date
+}
+
+  expect(differenceInDays(resultDate, referenceDate)).toBe(7);
+  expect(resultDate.getDate()).toBe(22);
+  expect(resultDate.getMonth()).toBe(5);
+  expect(resultDate.getFullYear()).toBe(2025);
+  expect(isValid(resultDate)).toBe(true);
+}
+`,
+              },
+            ],
+          },
+        ],
+      },
+
+      // ❌ Asserting isValid is false does NOT validate - date used after
+      {
+        code: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toBe(expected: unknown): void };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+  expect(isValid(d)).toBe(false);
+  console.log(d.toString());
+}
+`,
+        errors: [
+          {
+            messageId: "requireIsValid",
+            suggestions: [
+              {
+                messageId: "suggestGuard",
+                output: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toBe(expected: unknown): void };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+if (!isValid(d)) {
+  // TODO: handle invalid date
+}
+
+  expect(isValid(d)).toBe(false);
+  console.log(d.toString());
+}
+`,
+              },
+            ],
+          },
+        ],
+      },
+
+      // ❌ toBeFalsy() does NOT validate
+      {
+        code: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toBeFalsy(): void };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+  expect(isValid(d)).toBeFalsy();
+  console.log(d.toString());
+}
+`,
+        errors: [
+          {
+            messageId: "requireIsValid",
+            suggestions: [
+              {
+                messageId: "suggestGuard",
+                output: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toBeFalsy(): void };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+if (!isValid(d)) {
+  // TODO: handle invalid date
+}
+
+  expect(isValid(d)).toBeFalsy();
+  console.log(d.toString());
+}
+`,
+              },
+            ],
+          },
+        ],
+      },
+
+      // ❌ Chai-style to.be.false does NOT validate
+      {
+        code: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { to: { be: { false: void } } };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+  expect(isValid(d)).to.be.false;
+  console.log(d.toString());
+}
+`,
+        errors: [
+          {
+            messageId: "requireIsValid",
+            suggestions: [
+              {
+                messageId: "suggestGuard",
+                output: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { to: { be: { false: void } } };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+if (!isValid(d)) {
+  // TODO: handle invalid date
+}
+
+  expect(isValid(d)).to.be.false;
+  console.log(d.toString());
+}
+`,
+              },
+            ],
+          },
+        ],
+      },
+
+      // ❌ toEqual(false) does NOT validate
+      {
+        code: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toEqual(expected: unknown): void };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+  expect(isValid(d)).toEqual(false);
+  console.log(d.toString());
+}
+`,
+        errors: [
+          {
+            messageId: "requireIsValid",
+            suggestions: [
+              {
+                messageId: "suggestGuard",
+                output: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toEqual(expected: unknown): void };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+if (!isValid(d)) {
+  // TODO: handle invalid date
+}
+
+  expect(isValid(d)).toEqual(false);
+  console.log(d.toString());
+}
+`,
+              },
+            ],
+          },
+        ],
+      },
+
+      // ❌ toStrictEqual(false) does NOT validate
+      {
+        code: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toStrictEqual(expected: unknown): void };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+  expect(isValid(d)).toStrictEqual(false);
+  console.log(d.toString());
+}
+`,
+        errors: [
+          {
+            messageId: "requireIsValid",
+            suggestions: [
+              {
+                messageId: "suggestGuard",
+                output: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toStrictEqual(expected: unknown): void };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+if (!isValid(d)) {
+  // TODO: handle invalid date
+}
+
+  expect(isValid(d)).toStrictEqual(false);
+  console.log(d.toString());
 }
 `,
               },

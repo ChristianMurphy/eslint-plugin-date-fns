@@ -151,7 +151,43 @@ function hasIsValidCall(
     case "UnaryExpression": {
       return hasIsValidCall(node.argument, identifierName, getText);
     }
+    case "MemberExpression": {
+      // Check for Chai-style .to.be.false - this does NOT count as validation
+      if (
+        node.property.type === "Identifier" &&
+        node.property.name === "false"
+      ) {
+        return false;
+      }
+      return hasIsValidCall(node.object, identifierName, getText);
+    }
     case "CallExpression": {
+      // Check for false assertions like expect(isValid(d)).toBe(false) - these don't count as validation
+      if (
+        node.callee.type === "MemberExpression" &&
+        node.callee.property.type === "Identifier"
+      ) {
+        const methodName = node.callee.property.name;
+        // toBeFalsy() - not a validation
+        if (methodName === "toBeFalsy") {
+          return false;
+        }
+        // toBe(false), toEqual(false), toStrictEqual(false) - not a validation
+        if (
+          (methodName === "toBe" ||
+            methodName === "toEqual" ||
+            methodName === "toStrictEqual") &&
+          node.arguments.length > 0 &&
+          node.arguments[0]?.type === "Literal" &&
+          node.arguments[0].value === false
+        ) {
+          return false;
+        }
+      }
+      // Check callee (for chained calls like expect(...).toBe(...))
+      if (hasIsValidCall(node.callee, identifierName, getText)) {
+        return true;
+      }
       return node.arguments.some((argument) =>
         hasIsValidCall(argument, identifierName, getText),
       );
