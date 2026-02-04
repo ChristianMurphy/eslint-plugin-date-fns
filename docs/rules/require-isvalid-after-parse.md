@@ -173,6 +173,7 @@ The rule recognizes assertion-based validation commonly used in tests. These pat
 - `expect(isValid(date)).toBe(false)` - asserting invalid, not validating
 - `expect(isValid(date)).toBeFalsy()` - asserting invalid
 - `expect(isValid(date)).toEqual(false)` - asserting invalid
+- `expect(isValid(date)).toStrictEqual(false)` - asserting invalid
 - `expect(isValid(date)).to.be.false` (Chai-style) - asserting invalid
 
 ## Suggestion Behavior

@@ -1548,6 +1548,42 @@ if (!isValid(d)) {
           },
         ],
       },
+
+      // ❌ toStrictEqual(false) does NOT validate
+      {
+        code: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toStrictEqual(expected: unknown): void };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+  expect(isValid(d)).toStrictEqual(false);
+  console.log(d.toString());
+}
+`,
+        errors: [
+          {
+            messageId: "requireIsValid",
+            suggestions: [
+              {
+                messageId: "suggestGuard",
+                output: `
+import { parseISO, isValid } from 'date-fns';
+declare function expect(value: unknown): { toStrictEqual(expected: unknown): void };
+function testInvalidDate(input: string) {
+  const d = parseISO(input);
+if (!isValid(d)) {
+  // TODO: handle invalid date
+}
+
+  expect(isValid(d)).toStrictEqual(false);
+  console.log(d.toString());
+}
+`,
+              },
+            ],
+          },
+        ],
+      },
     ],
   });
 });
