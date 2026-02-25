@@ -18,10 +18,12 @@ const plugin = {
 
 plugin.configs = {
   recommended: {
+    name: "date-fns/recommended",
     plugins: { "date-fns": plugin },
     rules: recommendedRules,
   },
   diagnostic: {
+    name: "date-fns/diagnostic",
     plugins: { "date-fns": plugin },
     rules: diagnosticRules,
   },

@@ -86,7 +86,7 @@ function sameFileDeclaredString(
   context: TSESLint.RuleContext<MessageIds, Options>,
   id: TSESTree.Identifier,
 ): boolean {
-  const program = context.getSourceCode().ast;
+  const program = context.sourceCode.ast;
   for (const stmt of program.body) {
     if (stmt.type !== "VariableDeclaration") continue;
     for (const decl of stmt.declarations) {
@@ -161,18 +161,14 @@ export default createRule<Options, MessageIds>({
     { formatPlaceholder: "yyyy-MM-dd", refDateExpression: "new Date()" },
   ],
   create(context, [options]) {
-    const sourceCode = context.getSourceCode();
-    const checker =
-      "parserServices" in context
-        ? context.parserServices?.program?.getTypeChecker?.()
-        : undefined;
+    const sourceCode = context.sourceCode;
+    const services = ESLintUtils.getParserServices(context, true);
 
     function isDateParseShadowed(node: TSESTree.CallExpression): boolean {
       if (node.callee.type !== "MemberExpression") return false;
       const object = node.callee.object;
       if (object.type !== "Identifier" || object.name !== "Date") return false;
 
-      const sourceCode = context.getSourceCode();
       const scopeManager = sourceCode.scopeManager;
       if (scopeManager === null) return false;
 
@@ -201,10 +197,11 @@ export default createRule<Options, MessageIds>({
     function isStringType(node: TSESTree.Node): boolean {
       try {
         // Best effort TS check for union types and complex expressions
-        const tsNode = context.parserServices?.esTreeNodeToTSNodeMap?.get(node);
-        if (tsNode && checker) {
-          const typeAtLocation = checker.getTypeAtLocation(tsNode);
-          const typeString = checker.typeToString(typeAtLocation);
+        if (services.program) {
+          const type = services.getTypeAtLocation(node);
+          const typeString = services.program
+            .getTypeChecker()
+            .typeToString(type);
           // Handle union types like string | number - flag if contains string
           if (typeString.includes("string")) return true;
         }

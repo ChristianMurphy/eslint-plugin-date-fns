@@ -1248,7 +1248,6 @@ function analyzeSetterChain(node: TSESTree.CallExpression):
   };
 
   let currentNode: TSESTree.Node = node;
-  let dateArgument: TSESTree.Node | undefined = undefined;
 
   // Walk down the chain
   while (
@@ -1312,7 +1311,7 @@ function analyzeSetterChain(node: TSESTree.CallExpression):
   }
 
   // The final node is the date argument
-  dateArgument = currentNode;
+  const dateArgument: TSESTree.Node | undefined = currentNode;
 
   return dateArgument ? { ...values, dateArgument } : undefined;
 }

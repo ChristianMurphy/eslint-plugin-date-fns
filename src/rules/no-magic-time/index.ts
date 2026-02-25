@@ -540,7 +540,7 @@ function createSuggestions(
   suggestionType: "named-constant" | "date-fns" | "both" = "named-constant",
 ): TSESLint.SuggestionReportDescriptor<MessageIds>[] {
   const suggestions: TSESLint.SuggestionReportDescriptor<MessageIds>[] = [];
-  const sourceCode = context.getSourceCode();
+  const sourceCode = context.sourceCode;
 
   if (suggestionType === "date-fns" || suggestionType === "both") {
     // For DST footgun patterns, suggest appropriate date-fns functions
@@ -560,7 +560,7 @@ function createSuggestions(
           messageId: "suggestAddDays",
           fix: (fixer) => {
             // Transform: new Date(date.getTime() + 86400000) -> addDays(date, 1)
-            const sourceCode = context.getSourceCode();
+            const sourceCode = context.sourceCode;
 
             // For the test case: const tomorrow = new Date(date.getTime() + 86400000);
             // Expected output: import { addDays } from 'date-fns';\nconst tomorrow = addDays(date, 1);

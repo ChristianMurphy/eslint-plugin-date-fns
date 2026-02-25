@@ -9,7 +9,7 @@ export function ensureDateFnsNamedImports(
   fixer: TSESLint.RuleFixer,
   names: string[],
 ): TSESLint.RuleFix | undefined {
-  const sourceCode = context.getSourceCode();
+  const sourceCode = context.sourceCode;
   const program = sourceCode.ast;
 
   // Find all date-fns imports (only named imports)
@@ -99,7 +99,7 @@ export function ensureDateFnsTzNamedImports(
   fixer: TSESLint.RuleFixer,
   names: string[],
 ): TSESLint.RuleFix | undefined {
-  const sourceCode = context.getSourceCode();
+  const sourceCode = context.sourceCode;
   const program = sourceCode.ast;
 
   // Find all @date-fns/tz imports (only named imports)
