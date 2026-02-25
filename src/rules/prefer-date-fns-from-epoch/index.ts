@@ -131,7 +131,7 @@ export default createRule<Options, MessageIds>({
     }
 
     const checker = services.program.getTypeChecker();
-    const source = context.getSourceCode();
+    const source = context.sourceCode;
     const program = source.ast;
 
     /** TS semantic number-ish check, with literal/annotation fallbacks */

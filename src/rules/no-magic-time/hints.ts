@@ -4,8 +4,7 @@ import { TSESTree, TSESLint } from "@typescript-eslint/utils";
  * Minimal interface for comment context - only what getCommentHints needs
  */
 export interface CommentContext {
-  sourceCode?: { getAllComments: () => TSESLint.AST.Token[] };
-  getSourceCode?: () => { getAllComments: () => TSESLint.AST.Token[] };
+  sourceCode: { getAllComments: () => TSESLint.AST.Token[] };
 }
 
 /**
@@ -163,11 +162,7 @@ export function getCommentHints(
   context: CommentContext,
 ): string[] {
   const hints: string[] = [];
-  const sourceCode = context.sourceCode ?? context.getSourceCode?.();
-
-  if (!sourceCode) {
-    return hints;
-  }
+  const sourceCode = context.sourceCode;
 
   // Get all comments and filter for ones on the same line
   const allComments = sourceCode.getAllComments();

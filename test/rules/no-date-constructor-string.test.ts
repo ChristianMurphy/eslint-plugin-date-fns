@@ -18,14 +18,46 @@ test("no-date-constructor-string: valid", () => {
       // Edge case: any type variables should not be flagged as strings
       `declare const anyValue: any; const d = new Date(anyValue);`,
       `const val: any = getInput(); const d = new Date(val);`,
-
-      // Edge case: template literals with expressions should not be flagged
-      `declare const unknownStr: unknown; const template = \`\${unknownStr}\`; const d = new Date(template);`,
-
-      // Edge case: string constructor calls should not be flagged
-      `declare const anyStr: any; const str = String(anyStr); const d = new Date(str);`,
     ],
     invalid: [
+      {
+        // Template literals with expressions are string-typed (detected via type checker)
+        code: `declare const unknownStr: unknown; const template = \`\${unknownStr}\`; const d = new Date(template);`,
+        errors: [
+          {
+            messageId: "banNewDateString",
+            suggestions: [
+              {
+                messageId: "suggestParseISO",
+                output: `import { parseISO } from 'date-fns';\ndeclare const unknownStr: unknown; const template = \`\${unknownStr}\`; const d = parseISO(template);`,
+              },
+              {
+                messageId: "suggestParse",
+                output: `import { parse } from 'date-fns';\ndeclare const unknownStr: unknown; const template = \`\${unknownStr}\`; const d = parse(template, 'yyyy-MM-dd', new Date());`,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        // String() constructor calls produce string type (detected via type checker)
+        code: `declare const anyStr: any; const str = String(anyStr); const d = new Date(str);`,
+        errors: [
+          {
+            messageId: "banNewDateString",
+            suggestions: [
+              {
+                messageId: "suggestParseISO",
+                output: `import { parseISO } from 'date-fns';\ndeclare const anyStr: any; const str = String(anyStr); const d = parseISO(str);`,
+              },
+              {
+                messageId: "suggestParse",
+                output: `import { parse } from 'date-fns';\ndeclare const anyStr: any; const str = String(anyStr); const d = parse(str, 'yyyy-MM-dd', new Date());`,
+              },
+            ],
+          },
+        ],
+      },
       {
         // Test case: ISO literal should get automatic fix to parseISO
         code: `const d = new Date('2024-10-11T00:00:00Z');`,

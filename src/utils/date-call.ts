@@ -58,7 +58,7 @@ export function isDateShadowed(
     return false;
   }
 
-  const sourceCode = context.getSourceCode();
+  const sourceCode = context.sourceCode;
   const scopeManager = sourceCode.scopeManager;
   if (scopeManager === null) return false;
 
@@ -97,7 +97,7 @@ export function isBareGlobalDateCall(
     return false;
   }
 
-  const sourceCode = context.getSourceCode();
+  const sourceCode = context.sourceCode;
   const scopeManager = sourceCode.scopeManager;
   if (scopeManager === null) return true;
 

@@ -274,7 +274,7 @@ export default createRule<Options, MessageIds>({
   },
   defaultOptions: [],
   create(context) {
-    const source = context.getSourceCode();
+    const source = context.sourceCode;
 
     function checkDeclarator(declarator: TSESTree.VariableDeclarator): void {
       // Must be: const <id> = parse(...) / parseISO(...)

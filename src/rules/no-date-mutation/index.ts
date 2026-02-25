@@ -4,7 +4,6 @@ import {
   type TSESTree,
   type TSESLint,
 } from "@typescript-eslint/utils";
-import type { TypeChecker } from "typescript";
 import {
   ensureDateFnsNamedImports,
   ensureDateFnsTzNamedImports,
@@ -343,25 +342,19 @@ function isDateShadowedAtNode(
  */
 function isDateType(
   node: TSESTree.Expression,
-  checker: TypeChecker | undefined,
-  parserServices:
-    | NonNullable<TSESLint.SourceCode["parserServices"]>
-    | undefined,
+  services: ReturnType<typeof ESLintUtils.getParserServices>,
   sourceCode: TSESLint.SourceCode,
 ): boolean {
   if (isDateShadowedAtNode(node, sourceCode)) {
     return false;
   }
 
-  if (checker && parserServices?.esTreeNodeToTSNodeMap) {
+  if (services.program) {
     try {
-      const tsNode = parserServices.esTreeNodeToTSNodeMap.get(node);
-      if (tsNode) {
-        const type = checker.getTypeAtLocation(tsNode);
-        const typeString = checker.typeToString(type);
-        const isDate = typeString === "Date" || /\bDate\b/.test(typeString);
-        return isDate;
-      }
+      const type = services.getTypeAtLocation(node);
+      const typeString = services.program.getTypeChecker().typeToString(type);
+      const isDate = typeString === "Date" || /\bDate\b/.test(typeString);
+      return isDate;
     } catch {
       // Fall through to heuristics
     }
@@ -462,8 +455,7 @@ export default createRule<Options, MessageIds>({
   defaultOptions: [],
   create(context) {
     const sourceCode = context.sourceCode;
-    const parserServices = context.sourceCode.parserServices;
-    const checker = parserServices?.program?.getTypeChecker?.();
+    const services = ESLintUtils.getParserServices(context, true);
 
     const mutations: MutationInfo[] = [];
     let dateFixCounter = 0;
@@ -484,7 +476,7 @@ export default createRule<Options, MessageIds>({
         if (node.callee.optional || node.optional) return;
 
         const receiver = node.callee.object;
-        if (!isDateType(receiver, checker, parserServices, sourceCode)) return;
+        if (!isDateType(receiver, services, sourceCode)) return;
 
         const aliasCheck = hasAliasReadAfterMutation(
           node,
