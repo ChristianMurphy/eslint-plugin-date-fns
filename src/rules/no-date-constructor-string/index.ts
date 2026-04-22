@@ -2,6 +2,10 @@ import { ESLintUtils, TSESTree, TSESLint } from "@typescript-eslint/utils";
 import { isNewDateSyntax, isDateShadowed } from "../../utils/date-call.js";
 import { createImportAndReplaceFix } from "../../utils/fixers.js";
 import { getFirstArgument, getNodeRange } from "../../utils/types.js";
+import {
+  hasFullTypeInformation,
+  tryGetParserServices,
+} from "../../utils/type-services.js";
 import { parseISO, isValid } from "date-fns";
 
 const createRule = ESLintUtils.RuleCreator(
@@ -162,7 +166,7 @@ export default createRule<Options, MessageIds>({
   ],
   create(context, [options]) {
     const sourceCode = context.sourceCode;
-    const services = ESLintUtils.getParserServices(context, true);
+    const services = tryGetParserServices(context);
 
     function isDateParseShadowed(node: TSESTree.CallExpression): boolean {
       if (node.callee.type !== "MemberExpression") return false;
@@ -196,8 +200,9 @@ export default createRule<Options, MessageIds>({
 
     function isStringType(node: TSESTree.Node): boolean {
       try {
-        // Best effort TS check for union types and complex expressions
-        if (services.program) {
+        // Best-effort TS check for union types and complex expressions.
+        // Unavailable under oxlint / non-typescript-eslint parsers.
+        if (hasFullTypeInformation(services)) {
           const type = services.getTypeAtLocation(node);
           const typeString = services.program
             .getTypeChecker()

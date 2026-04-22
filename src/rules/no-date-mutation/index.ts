@@ -1,6 +1,7 @@
 import {
   ASTUtils,
   ESLintUtils,
+  type ParserServices,
   type TSESTree,
   type TSESLint,
 } from "@typescript-eslint/utils";
@@ -8,6 +9,10 @@ import {
   ensureDateFnsNamedImports,
   ensureDateFnsTzNamedImports,
 } from "../../utils/imports.js";
+import {
+  hasFullTypeInformation,
+  tryGetParserServices,
+} from "../../utils/type-services.js";
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
@@ -338,18 +343,75 @@ function isDateShadowedAtNode(
 }
 
 /**
- * Checks if expression is of Date type using TypeScript type information or heuristics.
+ * Checks if an identifier's declaration looks like a Date — either annotated
+ * `: Date` or initialized with `new Date(...)`. Uses scope analysis so it works
+ * for declarations inside function and block scopes, not just module scope.
+ */
+function isIdentifierDeclaredAsDate(
+  id: TSESTree.Identifier,
+  sourceCode: TSESLint.SourceCode,
+): boolean {
+  const scope = sourceCode.getScope
+    ? sourceCode.getScope(id)
+    : (sourceCode.scopeManager?.acquire(id) ?? undefined);
+  if (!scope) return false;
+
+  let current: typeof scope | null = scope;
+  while (current) {
+    const variable = current.variables.find((v) => v.name === id.name);
+    if (variable) {
+      for (const definition of variable.defs) {
+        if (
+          definition.type === "Variable" &&
+          definition.node.type === "VariableDeclarator"
+        ) {
+          const decl = definition.node;
+          const annotation =
+            decl.id.type === "Identifier" &&
+            decl.id.typeAnnotation?.type === "TSTypeAnnotation"
+              ? decl.id.typeAnnotation.typeAnnotation
+              : undefined;
+          if (
+            annotation?.type === "TSTypeReference" &&
+            annotation.typeName.type === "Identifier" &&
+            annotation.typeName.name === "Date"
+          ) {
+            return true;
+          }
+
+          const init = decl.init;
+          if (
+            init?.type === "NewExpression" &&
+            init.callee.type === "Identifier" &&
+            init.callee.name === "Date"
+          ) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+    current = current.upper;
+  }
+  return false;
+}
+
+/**
+ * Checks if expression is of Date type. Uses TypeScript type information when
+ * available; falls back to AST heuristics (explicit `new Date(...)`, known in-file
+ * declaration) when it isn't, so the rule still functions under oxlint or a plain
+ * ESLint setup without type-aware parser services.
  */
 function isDateType(
   node: TSESTree.Expression,
-  services: ReturnType<typeof ESLintUtils.getParserServices>,
+  services: ParserServices | undefined,
   sourceCode: TSESLint.SourceCode,
 ): boolean {
   if (isDateShadowedAtNode(node, sourceCode)) {
     return false;
   }
 
-  if (services.program) {
+  if (hasFullTypeInformation(services)) {
     try {
       const type = services.getTypeAtLocation(node);
       const typeString = services.program.getTypeChecker().typeToString(type);
@@ -375,7 +437,7 @@ function isDateType(
   }
 
   if (node.type === "Identifier") {
-    return false;
+    return isIdentifierDeclaredAsDate(node, sourceCode);
   }
 
   return false;
@@ -455,7 +517,7 @@ export default createRule<Options, MessageIds>({
   defaultOptions: [],
   create(context) {
     const sourceCode = context.sourceCode;
-    const services = ESLintUtils.getParserServices(context, true);
+    const services = tryGetParserServices(context);
 
     const mutations: MutationInfo[] = [];
     let dateFixCounter = 0;

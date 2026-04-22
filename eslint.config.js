@@ -9,7 +9,7 @@ import nodePlugin from "eslint-plugin-n";
 
 export default tseslint.config(
   {
-    ignores: ["dist"],
+    ignores: ["dist", "test/fixtures"],
   },
 
   {

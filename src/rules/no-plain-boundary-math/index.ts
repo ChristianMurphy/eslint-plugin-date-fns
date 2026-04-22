@@ -1,5 +1,9 @@
 import { ESLintUtils, type TSESTree } from "@typescript-eslint/utils";
 import { createImportAndReplaceFix } from "../../utils/fixers.js";
+import {
+  tryGetParserServices,
+  tryGetTypeChecker,
+} from "../../utils/type-services.js";
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
@@ -156,8 +160,8 @@ export default createRule<Options, MessageIds>({
   ],
   create(context, [options]) {
     const sourceCode = context.sourceCode;
-    const services = ESLintUtils.getParserServices(context);
-    const checker = services?.program?.getTypeChecker();
+    const services = tryGetParserServices(context);
+    const checker = tryGetTypeChecker(services);
 
     // Track date-fns imports
     const dateFnsImports = new Map<string, string>(); // localName -> importedName
@@ -1190,14 +1194,15 @@ function isNearEndOfDay(
 
 /**
  * Check if a node has a type that we should skip analyzing
- * (any, unknown, or not a Date type)
+ * (any, unknown, or not a Date type). Returns false when no type information is
+ * available so the rule still fires on AST-detectable patterns.
  */
 function shouldSkipType(
   node: TSESTree.Node,
   checker: import("typescript").TypeChecker | undefined,
-  services: ReturnType<typeof ESLintUtils.getParserServices>,
+  services: ReturnType<typeof ESLintUtils.getParserServices> | undefined,
 ): boolean {
-  if (!checker) return false;
+  if (!checker || !services) return false;
 
   try {
     const tsNode = services.esTreeNodeToTSNodeMap.get(node);

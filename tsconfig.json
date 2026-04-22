@@ -9,6 +9,7 @@
     "erasableSyntaxOnly": true,
     "isolatedModules": true,
     "allowImportingTsExtensions": true,
+    "types": ["node"],
 
     "strict": true,
     "exactOptionalPropertyTypes": true,
@@ -19,5 +20,5 @@
     "noEmit": true
   },
   "include": ["src", "test", "eslint.config.*", "package.json"],
-  "exclude": ["dist"]
+  "exclude": ["dist", "test/fixtures"]
 }
