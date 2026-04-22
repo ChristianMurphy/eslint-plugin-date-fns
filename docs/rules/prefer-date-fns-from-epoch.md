@@ -5,6 +5,10 @@ Prefer date-fns helpers for epoch numbers instead of Date constructor.
 🔧 Fixable
 💡 Provides suggestions
 
+## Type information
+
+Uses TypeScript type information when typescript-eslint's parser services are available (catches `number`-typed parameters from any source). Under oxlint or ESLint without the TS parser, falls back to AST: numeric literals, `: number` annotations, and in-scope numeric initializers. May miss type-aliased cases but never produces false positives.
+
 ## Rule Details
 
 This rule prefers using date-fns helpers when creating dates from epoch timestamps. It's easy to confuse seconds and milliseconds, and using dedicated helpers like `toDate(milliseconds)` and `fromUnixTime(seconds)` documents the unit and prevents mistakes./prefer-date-fns-from-epoch

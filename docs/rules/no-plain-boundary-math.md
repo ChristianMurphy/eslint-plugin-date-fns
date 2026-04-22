@@ -6,6 +6,10 @@ Disallow manual date boundary calculations in favor of date-fns boundary helpers
 
 💡 This rule provides suggestions for ambiguous patterns.
 
+## Type information
+
+Uses TypeScript type information when available to skip `any` / `unknown` receivers. Under oxlint or ESLint without the TS parser, runs purely from AST patterns (`setHours(0, 0, 0, 0)` etc.) — fewer non-Date false positives to skip, but no behavior difference for the core detection.
+
 ## Rule Details
 
 Manual date boundary calculations (start/end of day, month, week, etc.) are error-prone, hard to maintain, and obscure intent. date-fns provides clear, well-tested helper functions that handle edge cases correctly.

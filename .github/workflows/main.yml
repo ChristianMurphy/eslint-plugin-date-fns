@@ -6,9 +6,13 @@ on:
 
 jobs:
   main:
-    name: 'Test and Lint'
+    name: 'Test and Lint (TS ${{ matrix.typescript }})'
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        typescript: ['5', '6']
 
     steps:
       - uses: actions/checkout@v5
@@ -18,6 +22,9 @@ jobs:
           node-version: '24'
 
       - run: npm install
+
+      - name: Pin TypeScript ${{ matrix.typescript }}
+        run: npm install --no-save typescript@${{ matrix.typescript }}
 
       - run: npm test
 

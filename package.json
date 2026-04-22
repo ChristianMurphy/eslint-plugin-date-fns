@@ -16,7 +16,9 @@
     "lint": "tsc && type-coverage && eslint .",
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "npm run clean && npm run build",
-    "test": "npm run clean && npm run build && node --test --test-reporter=spec"
+    "test:eslint": "npm run clean && npm run build && node --test --test-reporter=spec test/rules/*.test.ts test/utils/*.test.ts",
+    "test:oxlint": "npm run build && node --test --test-reporter=spec test/oxlint.test.ts",
+    "test": "npm run test:eslint && npm run test:oxlint"
   },
   "repository": {
     "type": "git",
@@ -35,20 +37,20 @@
   },
   "homepage": "https://github.com/ChristianMurphy/eslint-plugin-date-fns#readme",
   "peerDependencies": {
-    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/parser": "^8.58.0",
     "eslint": "^10.0.0",
-    "typescript": "^5.0.0"
+    "typescript": ">=5.0.0"
   },
   "dependencies": {
     "@date-fns/tz": "^1.0.0",
-    "@typescript-eslint/utils": "^8.0.0",
+    "@typescript-eslint/utils": "^8.58.0",
     "date-fns": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",
     "@types/node": "^24.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "@typescript-eslint/rule-tester": "^8.0.0",
+    "@typescript-eslint/parser": "^8.58.0",
+    "@typescript-eslint/rule-tester": "^8.58.0",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-eslint-plugin": "^7.0.0",
@@ -57,11 +59,12 @@
     "eslint-plugin-sonarjs": "^4.0.0",
     "eslint-plugin-unicorn": "^61.0.0",
     "globals": "^16.0.0",
+    "oxlint": "^1.61.0",
     "prettier": "^3.0.0",
     "rimraf": "^6.0.0",
     "type-coverage": "^2.0.0",
-    "typescript": "^5.0.0",
-    "typescript-eslint": "^8.0.0"
+    "typescript": "^6.0.0",
+    "typescript-eslint": "^8.58.0"
   },
   "typeCoverage": {
     "atLeast": 100,

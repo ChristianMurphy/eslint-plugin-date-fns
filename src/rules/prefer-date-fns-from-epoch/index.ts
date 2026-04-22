@@ -3,14 +3,16 @@ import {
   ASTUtils,
   ESLintUtils,
   TSESTree,
-  type ParserServices,
-  type ParserServicesWithTypeInformation,
 } from "@typescript-eslint/utils";
 import * as ts from "typescript";
 import { isTypeNumberish } from "../../utils/types.js";
 import { isNewDateSyntax, isDateShadowed } from "../../utils/date-call.js";
 import { getSingleExpressionArgument } from "../../utils/expressions.js";
 import { createImportAndReplaceFix } from "../../utils/fixers.js";
+import {
+  hasFullTypeInformation,
+  tryGetParserServices,
+} from "../../utils/type-services.js";
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
@@ -23,20 +25,6 @@ type MessageIds =
   | "preferFromUnixTime"
   | "suggestToDate"
   | "suggestFromUnixTime";
-
-/**
- * Checks if parser services include full TypeScript type information.
- */
-function hasFullTypeInformation(
-  services: ParserServices,
-): services is ParserServicesWithTypeInformation {
-  return (
-    "program" in services &&
-    services.program !== null &&
-    "getTypeAtLocation" in services &&
-    "getSymbolAtLocation" in services
-  );
-}
 
 /**
  * Checks if absolute value represents 10-digit Unix seconds.
@@ -124,28 +112,32 @@ export default createRule<Options, MessageIds>({
   },
   defaultOptions: [],
   create(context) {
-    const services = ESLintUtils.getParserServices(context, true);
-    if (!hasFullTypeInformation(services)) {
-      // No type info (shouldn't happen with the `true` flag, but keeps TS happy)
-      return {};
-    }
-
-    const checker = services.program.getTypeChecker();
+    const services = tryGetParserServices(context);
+    const checker = hasFullTypeInformation(services)
+      ? services.program.getTypeChecker()
+      : undefined;
     const source = context.sourceCode;
     const program = source.ast;
 
-    /** TS semantic number-ish check, with literal/annotation fallbacks */
+    /**
+     * Semantic number-ish check. Prefers TypeScript type information when the
+     * parser provides it (full precision on aliased and union types), and falls
+     * back to literal / annotation / in-file-initializer analysis when not —
+     * which is what oxlint and plain ESLint without the TS parser get.
+     */
     function isNumberish(node: TSESTree.Expression): boolean {
       // Check literal numbers first (this should catch numeric literals)
       if (node.type === "Literal" && typeof node.value === "number") {
         return true;
       }
 
-      // Try TypeScript semantic analysis
-      const tsNode = services.esTreeNodeToTSNodeMap.get(node);
-      if (ts.isExpression(tsNode)) {
-        const typeAtLocation = checker.getTypeAtLocation(tsNode);
-        if (isTypeNumberish(typeAtLocation)) return true;
+      // Try TypeScript semantic analysis when available
+      if (checker && hasFullTypeInformation(services)) {
+        const tsNode = services.esTreeNodeToTSNodeMap.get(node);
+        if (ts.isExpression(tsNode)) {
+          const typeAtLocation = checker.getTypeAtLocation(tsNode);
+          if (isTypeNumberish(typeAtLocation)) return true;
+        }
       }
 
       if (ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(node)) {

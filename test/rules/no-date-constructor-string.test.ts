@@ -1,11 +1,11 @@
 import test from "node:test";
-import { tester } from "../_setup.ts";
+import { runOnBoth } from "../_setup.ts";
 import rule from "../../dist/rules/no-date-constructor-string/index.js";
 
 // Test cases for no-date-constructor-string rule
 // Tests string literal autofixes, variable suggestions, and edge cases
-test("no-date-constructor-string: valid", () => {
-  tester.run("no-date-constructor-string", rule, {
+test("no-date-constructor-string", () => {
+  runOnBoth("no-date-constructor-string", rule, {
     valid: [
       // Valid date-fns usage
       `import { parseISO } from 'date-fns'; const d = parseISO('2024-10-11T00:00:00Z');`,
@@ -21,7 +21,9 @@ test("no-date-constructor-string: valid", () => {
     ],
     invalid: [
       {
-        // Template literals with expressions are string-typed (detected via type checker)
+        // Template literals with expressions require type checker to
+        // resolve the resulting identifier `template` to string.
+        typeAwareOnly: true,
         code: `declare const unknownStr: unknown; const template = \`\${unknownStr}\`; const d = new Date(template);`,
         errors: [
           {
@@ -40,7 +42,9 @@ test("no-date-constructor-string: valid", () => {
         ],
       },
       {
-        // String() constructor calls produce string type (detected via type checker)
+        // String() constructor call needs the type checker to resolve
+        // `str` to a string.
+        typeAwareOnly: true,
         code: `declare const anyStr: any; const str = String(anyStr); const d = new Date(str);`,
         errors: [
           {
