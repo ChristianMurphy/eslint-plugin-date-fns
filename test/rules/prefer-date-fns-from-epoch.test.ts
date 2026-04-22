@@ -1,11 +1,11 @@
 import test from "node:test";
-import { tester } from "../_setup.ts";
+import { runOnBoth } from "../_setup.ts";
 import rule from "../../dist/rules/prefer-date-fns-from-epoch/index.js";
 
 // Test cases for prefer-date-fns-from-epoch rule
 // Tests epoch timestamp detection and conversion to fromUnixTime/toDate
 test("prefer-date-fns-from-epoch", () => {
-  tester.run("prefer-date-fns-from-epoch", rule, {
+  runOnBoth("prefer-date-fns-from-epoch", rule, {
     valid: [
       // Already using date-fns
       `import { toDate } from 'date-fns'; const d = toDate(1726700000000);`,
@@ -41,8 +41,10 @@ test("prefer-date-fns-from-epoch", () => {
         output: `import { toDate } from 'date-fns';\nconst d = toDate(1726700000000);`,
         errors: [{ messageId: "preferToDate" }],
       },
-      // Negative 10-digit seconds → suggestions only
+      // Negative 10-digit seconds → suggestions only. AST-only cannot
+      // see a `UnaryExpression` as numeric without the type checker.
       {
+        typeAwareOnly: true,
         code: `const d = new Date(-1234567890);`,
         errors: [
           {
@@ -153,8 +155,10 @@ test("prefer-date-fns-from-epoch", () => {
           },
         ],
       },
-      // Union including number (no literal init) → suggestions only
+      // Union including number (no literal init) → suggestions only.
+      // AST-only only recognises `TSNumberKeyword`, not unions.
       {
+        typeAwareOnly: true,
         code: `declare let u: number | string; const d = new Date(u);`,
         errors: [
           {
@@ -180,8 +184,10 @@ test("prefer-date-fns-from-epoch", () => {
         errors: [{ messageId: "preferToDate" }],
       },
 
-      // ❌ Unknown type that could be epoch number
+      // ❌ Unknown type that could be epoch number. AST-only cannot
+      // interpret `as number` type assertions.
       {
+        typeAwareOnly: true,
         code: `declare const unknownEpoch: unknown; const d = new Date(unknownEpoch as number);`,
         errors: [
           {
@@ -200,8 +206,10 @@ test("prefer-date-fns-from-epoch", () => {
         ],
       },
 
-      // ❌ Numeric literal from any (should be detected)
+      // ❌ Numeric literal from any (should be detected). AST-only
+      // cannot resolve `+anyEpoch` initializer to a number.
       {
+        typeAwareOnly: true,
         code: `declare const anyEpoch: any; const epoch = +anyEpoch; const d = new Date(epoch);`,
         errors: [
           {
@@ -220,8 +228,10 @@ test("prefer-date-fns-from-epoch", () => {
         ],
       },
 
-      // ❌ Unknown variable from function
+      // ❌ Unknown variable from function. Same `as number`
+      // interpretation issue as above.
       {
+        typeAwareOnly: true,
         code: `const epochValue: unknown = getTimestamp(); const d = new Date(epochValue as number);`,
         errors: [
           {

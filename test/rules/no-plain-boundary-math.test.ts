@@ -1,9 +1,9 @@
 import test from "node:test";
-import { tester } from "../_setup.ts";
+import { runOnBoth } from "../_setup.ts";
 import rule from "../../dist/rules/no-plain-boundary-math/index.js";
 
 test("no-plain-boundary-math: valid cases", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [
       // Already using date-fns boundaries
       `import { startOfDay } from 'date-fns'; const d = startOfDay(new Date());`,
@@ -37,9 +37,15 @@ test("no-plain-boundary-math: valid cases", () => {
       `import { set } from 'lodash'; set({}, "hours", 0);`,
       `const obj = { setHours: () => {} }; obj.setHours(0);`,
 
-      // TypeScript unknown/any (can't analyze)
-      `declare const d: unknown; d.setHours(0, 0, 0, 0);`,
-      `const d: any = getDate(); d.setHours(0, 0, 0, 0);`,
+      // TypeScript unknown/any (skipped via type checker — AST-only cannot know)
+      {
+        code: `declare const d: unknown; d.setHours(0, 0, 0, 0);`,
+        typeAwareOnly: true,
+      },
+      {
+        code: `const d: any = getDate(); d.setHours(0, 0, 0, 0);`,
+        typeAwareOnly: true,
+      },
 
       // Complex expressions we don't handle
       `const d = new Date(); d.setHours(config?.startHour || 0, 0, 0, 0);`,
@@ -50,7 +56,7 @@ test("no-plain-boundary-math: valid cases", () => {
 });
 
 test("no-plain-boundary-math: plain Date start of day", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Basic start of day pattern
@@ -78,7 +84,7 @@ test("no-plain-boundary-math: plain Date start of day", () => {
 });
 
 test("no-plain-boundary-math: plain Date end of day (strict mode)", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Canonical EOD with milliseconds
@@ -110,7 +116,7 @@ test("no-plain-boundary-math: plain Date end of day (strict mode)", () => {
 });
 
 test("no-plain-boundary-math: plain Date end of day (lenient mode)", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Canonical EOD with milliseconds - autofix
@@ -150,7 +156,7 @@ test("no-plain-boundary-math: plain Date end of day (lenient mode)", () => {
 });
 
 test("no-plain-boundary-math: plain Date end of day (aggressive mode)", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Canonical EOD - autofix
@@ -181,7 +187,7 @@ test("no-plain-boundary-math: plain Date end of day (aggressive mode)", () => {
 });
 
 test("no-plain-boundary-math: date-fns set() to start of day", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [
       // With other properties (not a boundary)
       `import { set } from 'date-fns';\nconst s = set(d, { year: 2024, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });`,
@@ -198,7 +204,7 @@ test("no-plain-boundary-math: date-fns set() to start of day", () => {
 });
 
 test("no-plain-boundary-math: date-fns setter chains to start of day", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Setter chain to start of day
@@ -219,7 +225,7 @@ test("no-plain-boundary-math: date-fns setter chains to start of day", () => {
 });
 
 test("no-plain-boundary-math: date-fns set() to end of day", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Canonical EOD in strict mode
@@ -250,7 +256,7 @@ test("no-plain-boundary-math: date-fns set() to end of day", () => {
 });
 
 test("no-plain-boundary-math: date-fns setter chains to end of day", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Setter chain to EOD (lenient)
@@ -265,7 +271,7 @@ test("no-plain-boundary-math: date-fns setter chains to end of day", () => {
 });
 
 test("no-plain-boundary-math: month boundaries", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // End of month (day 0 trick)
@@ -293,7 +299,7 @@ test("no-plain-boundary-math: month boundaries", () => {
 });
 
 test("no-plain-boundary-math: year boundaries", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Start of year
@@ -315,7 +321,7 @@ test("no-plain-boundary-math: year boundaries", () => {
 });
 
 test("no-plain-boundary-math: hour/minute/second boundaries", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Start of hour
@@ -343,7 +349,7 @@ test("no-plain-boundary-math: hour/minute/second boundaries", () => {
 });
 
 test("no-plain-boundary-math: import management", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Merge with existing date-fns import
@@ -364,7 +370,7 @@ test("no-plain-boundary-math: import management", () => {
 });
 
 test("no-plain-boundary-math: composition with existing date-fns", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Composition: set() after addDays()
@@ -378,7 +384,7 @@ test("no-plain-boundary-math: composition with existing date-fns", () => {
 });
 
 test("no-plain-boundary-math: suggestions for ambiguous patterns", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [],
     invalid: [
       // Variable hour value
@@ -417,7 +423,7 @@ test("no-plain-boundary-math: suggestions for ambiguous patterns", () => {
 });
 
 test("no-plain-boundary-math: edge cases", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [
       // Shadowed Date constructor - should not trigger
       `function test(Date) { const d = new Date(2024, 1, 0); return d; }`,
@@ -425,15 +431,18 @@ test("no-plain-boundary-math: edge cases", () => {
       // Shadowed date-fns set
       `import { set as lodashSet } from 'lodash'; lodashSet(obj, "hours", 0);`,
 
-      // TypeScript any type - should not trigger
-      `const date: any = getDate(); date.setHours(0, 0, 0, 0);`,
+      // TypeScript any type - skipped via type checker; AST-only cannot know
+      {
+        code: `const date: any = getDate(); date.setHours(0, 0, 0, 0);`,
+        typeAwareOnly: true,
+      },
     ],
     invalid: [],
   });
 });
 
 test("no-plain-boundary-math: detectHacks option", () => {
-  tester.run("no-plain-boundary-math", rule, {
+  runOnBoth("no-plain-boundary-math", rule, {
     valid: [
       // With detectHacks disabled, millisecond math is ignored
       {

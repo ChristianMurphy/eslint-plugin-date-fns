@@ -380,12 +380,20 @@ function isIdentifierDeclaredAsDate(
           }
 
           const init = decl.init;
-          if (
-            init?.type === "NewExpression" &&
-            init.callee.type === "Identifier" &&
-            init.callee.name === "Date"
-          ) {
-            return true;
+          if (init?.type === "NewExpression") {
+            const callee = init.callee;
+            if (callee.type === "Identifier" && callee.name === "Date") {
+              return true;
+            }
+            if (
+              callee.type === "MemberExpression" &&
+              callee.object.type === "Identifier" &&
+              callee.object.name === "globalThis" &&
+              callee.property.type === "Identifier" &&
+              callee.property.name === "Date"
+            ) {
+              return true;
+            }
           }
         }
       }

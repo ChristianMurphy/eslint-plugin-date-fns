@@ -1,9 +1,9 @@
 import test from "node:test";
-import { tester } from "../_setup.ts";
+import { runOnBoth } from "../_setup.ts";
 import rule from "../../dist/rules/no-date-mutation/index.js";
 
 test("no-date-mutation: valid cases", () => {
-  tester.run("no-date-mutation", rule, {
+  runOnBoth("no-date-mutation", rule, {
     valid: [
       // date-fns usage - should NOT trigger
       `import { set } from 'date-fns'; let d = new Date(); d = set(d, { hours: 14 });`,
@@ -31,7 +31,7 @@ test("no-date-mutation: valid cases", () => {
 });
 
 test("no-date-mutation: basic detection", () => {
-  tester.run("no-date-mutation", rule, {
+  runOnBoth("no-date-mutation", rule, {
     valid: [],
     invalid: [
       // Legacy setYear - not yet handled
@@ -94,7 +94,7 @@ test("no-date-mutation: basic detection", () => {
 });
 
 test("no-date-mutation: simple field updates", () => {
-  tester.run("no-date-mutation", rule, {
+  runOnBoth("no-date-mutation", rule, {
     valid: [],
     invalid: [
       // Simple field updates → set()
@@ -211,7 +211,7 @@ test("no-date-mutation: simple field updates", () => {
 });
 
 test("no-date-mutation: arithmetic unit normalization", () => {
-  tester.run("no-date-mutation", rule, {
+  runOnBoth("no-date-mutation", rule, {
     valid: [],
     invalid: [
       // Milliseconds → seconds (1000ms = 1s)
@@ -372,7 +372,7 @@ test("no-date-mutation: arithmetic unit normalization", () => {
 });
 
 test("no-date-mutation: consecutive setters", () => {
-  tester.run("no-date-mutation", rule, {
+  runOnBoth("no-date-mutation", rule, {
     valid: [],
     invalid: [
       // Basic consecutive setters - should merge into one set() call
@@ -414,7 +414,7 @@ test("no-date-mutation: consecutive setters", () => {
 });
 
 test("no-date-mutation: side effects with temp variables", () => {
-  tester.run("no-date-mutation", rule, {
+  runOnBoth("no-date-mutation", rule, {
     valid: [],
     invalid: [
       // Side effect in single setter - needs temp variable
@@ -464,7 +464,7 @@ test("no-date-mutation: side effects with temp variables", () => {
 });
 
 test("no-date-mutation: UTC/local mismatch detection", () => {
-  tester.run("no-date-mutation", rule, {
+  runOnBoth("no-date-mutation", rule, {
     valid: [],
     invalid: [
       // UTC setter with local getter - unclear intent
@@ -494,7 +494,7 @@ test("no-date-mutation: UTC/local mismatch detection", () => {
 });
 
 test("no-date-mutation: aliasing detection", () => {
-  tester.run("no-date-mutation", rule, {
+  runOnBoth("no-date-mutation", rule, {
     valid: [],
     invalid: [
       // Alias created but not used after mutation - safe to fix
