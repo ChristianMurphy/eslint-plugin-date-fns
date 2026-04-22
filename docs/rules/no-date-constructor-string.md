@@ -5,6 +5,10 @@ Disallow string-based Date construction and parsing. Use date-fns functions inst
 🔧 Fixable
 💡 Provides suggestions
 
+## Type information
+
+Uses TypeScript type information when typescript-eslint's parser services are available (catches `string | number` and similar unions). Under oxlint or ESLint without the TS parser, falls back to AST: string literals, template literals, string concatenation, and in-file string declarations. May miss type-aliased cases but never produces false positives.
+
 ## Rule Details
 
 This rule disallows using strings with the Date constructor and Date.parse(). These native JavaScript functions are hard to read and historically inconsistent across different environments and browsers. Using date-fns functions like `parseISO()` and `parse()` makes intent explicit and provides consistent behavior.

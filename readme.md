@@ -5,7 +5,7 @@
 
 Date handling lint rules that steer JavaScript/TypeScript code toward clarity and safety by preferring date-fns over ambiguous Date constructor usage.
 
-Designed for ESLint v9 (flat config), TypeScript (via typescript-eslint), Node 22+, and ESM projects.
+Designed for ESLint v10 (flat config), TypeScript 5.x–6.x (via typescript-eslint) or oxlint, Node 22+, and ESM projects.
 
 ## Why use this plugin?
 
@@ -14,9 +14,9 @@ The `new Date(string)` constructor and multi-argument `new Date(y, m, d, ...)` a
 ## Requirements
 
 - Node.js: 22+
-- ESLint: 9.x
-- TypeScript: 5.x
-- typescript-eslint: 8.x
+- ESLint: 10.x (or oxlint 1.61+ for the JS plugins API)
+- TypeScript: 5.x or 6.x
+- typescript-eslint: 8.58+ (required for TypeScript 6 support)
 - date-fns: 4.x
 - Module system: ESM only (`"type": "module"`)
 
@@ -48,7 +48,9 @@ export default [
 - `no-bare-date-call`
 - `no-date-coercion-literals`
 - `no-date-constructor-string`
+- `no-date-mutation`
 - `no-legacy-year-components`
+- `no-plain-boundary-math`
 - `prefer-date-fns-from-epoch`
 - `prefer-iso-literal-over-components`
 - `require-isvalid-after-parse`
@@ -107,4 +109,25 @@ These rules help identify potential code quality issues but may have false posit
 | Rule | What it guards | Autofix | Suggestions | Comments | Docs |
 | -------------------------------------- | ------------------------------------------------------------------------- | ---------- | -------------- | -------- | ------- |
 | no-magic-time | Detects numeric literals that appear to be time constants | None | Named constants, date-fns alternatives | Improve time constant clarity | [docs](./docs/rules/no-magic-time.md) |
+
+## Use with oxlint
+
+The plugin works under oxlint's JavaScript plugins API (alpha). Install `oxlint@^1.61.0`, build this plugin, and reference it from `.oxlintrc.json`:
+
+```json
+{
+  "jsPlugins": [
+    { "name": "date-fns", "specifier": "eslint-plugin-date-fns" }
+  ],
+  "rules": {
+    "date-fns/no-date-constructor-string": "error",
+    "date-fns/no-date-mutation": "error",
+    "date-fns/no-bare-date-call": "error"
+  }
+}
+```
+
+Then run `npx oxlint --config .oxlintrc.json`.
+
+**Type information under oxlint**: Four rules (`no-date-mutation`, `no-date-constructor-string`, `prefer-date-fns-from-epoch`, `no-plain-boundary-math`) use TypeScript's type checker when available for maximum precision (e.g. recognizing aliased `Date` values). Under oxlint, where only AST is available, these rules fall back to scope + AST heuristics — they may report fewer diagnostics on type-aliased code, but never false positives.
 

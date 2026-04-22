@@ -6,6 +6,10 @@ Disallow in-place mutation of `Date` instances. Prefer immutable date-fns altern
 
 💡 Provides suggestions for ambiguous cases
 
+## Type information
+
+Uses TypeScript type information when typescript-eslint's parser services are available (detects aliased `Date` types through type annotations and returns). Under oxlint or ESLint without the TS parser, falls back to scope-aware AST detection: variables initialized with `new Date(...)` or annotated `: Date`. May report fewer diagnostics in the no-types path, but never false positives.
+
 ## Rule Details
 
 This rule enforces immutable date operations by disallowing direct mutation of Date objects through setter methods. Instead, it requires using date-fns v4 functions which return new Date instances.
