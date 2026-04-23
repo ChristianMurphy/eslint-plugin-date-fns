@@ -51,12 +51,16 @@ export default [
 - `no-date-mutation`
 - `no-legacy-year-components`
 - `no-plain-boundary-math`
+- `prefer-date-fns-comparison`
 - `prefer-date-fns-from-epoch`
 - `prefer-iso-literal-over-components`
 - `require-isvalid-after-parse`
 
 **`diagnostic`** - Code quality and maintainability rules that may have false positives in some contexts (set to "warn"):
+- `no-date-in-string-interpolation` - Flags implicit Date-to-string coercion in templates and `+` concatenation
 - `no-magic-time` - Detects numeric literals that appear to be time constants
+- `no-namespace-date-fns-import` - Flags `import * as X from 'date-fns'` that defeats tree-shaking
+- `prefer-difference-in-unit` - Prefers `differenceIn*` helpers over manual `(b - a) / ms` arithmetic
 
 You can use both presets together, or just one depending on your needs.
 
@@ -98,6 +102,7 @@ These rules prevent common date handling bugs and enforce safe patterns.
 | no-date-mutation | Forbid in-place Date mutation (setter methods) | Most cases | UTC/local mismatch | Enforce immutability | [docs](./docs/rules/no-date-mutation.md) |
 | no-legacy-year-components | Forbid `new Date(y, ...)` with `0 ≤ y ≤ 99` (1900+ quirk) | None | 4-digit year via `parseISO()` | Avoid century ambiguity | [docs](./docs/rules/no-legacy-year-components.md) |
 | no-plain-boundary-math | Forbid manual boundary calculations (setHours, etc.) | Most patterns | Variables/complex expressions | Use `startOfDay`, `endOfMonth`, etc. | [docs](./docs/rules/no-plain-boundary-math.md) |
+| prefer-date-fns-comparison | Forbid equality operators on Date timestamps | `.getTime()`/`.valueOf()` pairs | Date-typed and AST-inferrable operands | Prefer `isEqual` over `===` on Dates | [docs](./docs/rules/prefer-date-fns-comparison.md) |
 | prefer-date-fns-from-epoch | Prefer `fromUnixTime(sec)` over `new Date(number)` | Numeric literals | Variables get suggestions | Safe epoch conversion | [docs](./docs/rules/prefer-date-fns-from-epoch.md) |
 | prefer-iso-literal-over-components | Replace `new Date(y, m, d, ...)` (all numeric literals) | All-literal calls | Mixed literal/variable calls | UTC ISO format | [docs](./docs/rules/prefer-iso-literal-over-components.md) |
 | require-isvalid-after-parse | Require checking `isValid(x)` after `parse/parseISO` before use | None | Validation guard patterns | Prevent invalid date bugs | [docs](./docs/rules/require-isvalid-after-parse.md) |
@@ -108,7 +113,10 @@ These rules help identify potential code quality issues but may have false posit
 
 | Rule | What it guards | Autofix | Suggestions | Comments | Docs |
 | -------------------------------------- | ------------------------------------------------------------------------- | ---------- | -------------- | -------- | ------- |
+| no-date-in-string-interpolation | Implicit Date-to-string coercion in templates and `+` concatenation | None | `format(expr, 'yyyy-MM-dd')` | Locale-dependent output | [docs](./docs/rules/no-date-in-string-interpolation.md) |
 | no-magic-time | Detects numeric literals that appear to be time constants | None | Named constants, date-fns alternatives | Improve time constant clarity | [docs](./docs/rules/no-magic-time.md) |
+| no-namespace-date-fns-import | `import * as` / bag `require` of date-fns packages | None | None | Defeats tree-shaking | [docs](./docs/rules/no-namespace-date-fns-import.md) |
+| prefer-difference-in-unit | Manual Date subtraction with known-unit divisor | Known time units | None | Use `differenceIn*` helpers | [docs](./docs/rules/prefer-difference-in-unit.md) |
 
 ## Use with oxlint
 
@@ -129,5 +137,5 @@ The plugin works under oxlint's JavaScript plugins API (alpha). Install `oxlint@
 
 Then run `npx oxlint --config .oxlintrc.json`.
 
-**Type information under oxlint**: Four rules (`no-date-mutation`, `no-date-constructor-string`, `prefer-date-fns-from-epoch`, `no-plain-boundary-math`) use TypeScript's type checker when available for maximum precision (e.g. recognizing aliased `Date` values). Under oxlint, where only AST is available, these rules fall back to scope + AST heuristics — they may report fewer diagnostics on type-aliased code, but never false positives.
+**Type information under oxlint**: Seven rules (`no-date-mutation`, `no-date-constructor-string`, `prefer-date-fns-from-epoch`, `no-plain-boundary-math`, `prefer-date-fns-comparison`, `prefer-difference-in-unit`, `no-date-in-string-interpolation`) use TypeScript's type checker when available for maximum precision (e.g. recognizing aliased `Date` values). Under oxlint, where only AST is available, these rules fall back to scope + AST heuristics — they may report fewer diagnostics on type-aliased code, but never false positives.
 

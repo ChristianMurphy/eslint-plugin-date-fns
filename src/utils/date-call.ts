@@ -5,6 +5,153 @@ import {
   type TSESTree,
 } from "@typescript-eslint/utils";
 import { getNodeRange } from "./types.js";
+import {
+  hasFullTypeInformation,
+  tryGetParserServices,
+} from "./type-services.js";
+
+/**
+ * Conservative set of date-fns functions known to return `Date`. Kept
+ * narrow on purpose: this list feeds AST-only Date detection where false
+ * positives are worse than misses. Extend as concrete rule gaps surface.
+ */
+export const DATE_FNS_DATE_RETURNING: ReadonlySet<string> = new Set([
+  "addDays",
+  "addHours",
+  "addMilliseconds",
+  "addMinutes",
+  "addMonths",
+  "addQuarters",
+  "addSeconds",
+  "addWeeks",
+  "addYears",
+  "endOfDay",
+  "endOfHour",
+  "endOfISOWeek",
+  "endOfMinute",
+  "endOfMonth",
+  "endOfQuarter",
+  "endOfSecond",
+  "endOfWeek",
+  "endOfYear",
+  "fromUnixTime",
+  "lastDayOfMonth",
+  "lastDayOfQuarter",
+  "lastDayOfWeek",
+  "lastDayOfYear",
+  "parse",
+  "parseISO",
+  "parseJSON",
+  "set",
+  "setDate",
+  "setDayOfYear",
+  "setHours",
+  "setISODay",
+  "setISOWeek",
+  "setISOWeekYear",
+  "setMilliseconds",
+  "setMinutes",
+  "setMonth",
+  "setQuarter",
+  "setSeconds",
+  "setWeek",
+  "setWeekYear",
+  "setYear",
+  "startOfDay",
+  "startOfHour",
+  "startOfISOWeek",
+  "startOfMinute",
+  "startOfMonth",
+  "startOfQuarter",
+  "startOfSecond",
+  "startOfWeek",
+  "startOfYear",
+  "subDays",
+  "subHours",
+  "subMilliseconds",
+  "subMinutes",
+  "subMonths",
+  "subQuarters",
+  "subSeconds",
+  "subWeeks",
+  "subYears",
+  "toDate",
+]);
+
+/**
+ * Collects the set of date-fns Date-returning identifiers actually
+ * imported into this file. The local binding is what we match against at
+ * the call site — an unrelated user-defined `parseISO` is not in this
+ * set, which prevents AST-only Date detection from mis-firing on lookalikes.
+ */
+export function collectImportedDateReturners(
+  program: TSESTree.Program,
+): ReadonlySet<string> {
+  const out = new Set<string>();
+  for (const stmt of program.body) {
+    if (stmt.type !== AST_NODE_TYPES.ImportDeclaration) continue;
+    if (stmt.source.value !== "date-fns") continue;
+    for (const spec of stmt.specifiers) {
+      if (spec.type !== AST_NODE_TYPES.ImportSpecifier) continue;
+      const importedName =
+        spec.imported.type === AST_NODE_TYPES.Identifier
+          ? spec.imported.name
+          : spec.imported.value;
+      if (DATE_FNS_DATE_RETURNING.has(importedName)) {
+        out.add(spec.local.name);
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Recognizes expressions that clearly evaluate to a `Date` without
+ * requiring the TypeScript type checker: `new Date(...)` and calls to a
+ * date-fns Date-returning function that is actually imported in this file.
+ */
+export function isObviouslyDateExpression(
+  node: TSESTree.Expression,
+  importedDateReturners: ReadonlySet<string>,
+): boolean {
+  if (ASTUtils.isNodeOfType(AST_NODE_TYPES.NewExpression)(node)) {
+    return isNewDateSyntax(node);
+  }
+  if (ASTUtils.isNodeOfType(AST_NODE_TYPES.CallExpression)(node)) {
+    const { callee } = node;
+    if (ASTUtils.isNodeOfType(AST_NODE_TYPES.Identifier)(callee)) {
+      return importedDateReturners.has(callee.name);
+    }
+  }
+  return false;
+}
+
+/**
+ * Best-effort Date-type detection. Returns `true` when the TS checker
+ * reports the expression's type as exactly "Date"; returns `false` both
+ * when the type is something else and when type information is absent.
+ * Callers must combine this with AST fallback for AST-only environments.
+ *
+ * The exact-string match is deliberately narrow: `Date | null`,
+ * `Date | undefined`, aliases, and generic parameters are excluded.
+ * That guarantees no false positives at the cost of some misses.
+ * Contrast with `no-date-mutation`, which uses a permissive
+ * `/\bDate\b/` substring match because its operators are safe to flag
+ * on any receiver that claims to have a Date-setter method.
+ */
+export function isDateTyped(
+  node: TSESTree.Node,
+  services: ReturnType<typeof tryGetParserServices>,
+): boolean {
+  if (!hasFullTypeInformation(services)) return false;
+  try {
+    const type = services.getTypeAtLocation(node);
+    const typeString = services.program.getTypeChecker().typeToString(type);
+    return typeString === "Date";
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Detects Date constructor patterns including globalThis.Date and globalThis['Date'].

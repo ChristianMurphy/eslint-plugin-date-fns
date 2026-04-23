@@ -14,6 +14,7 @@ const recommendedRules: Linter.RulesRecord = {
   "date-fns/require-isvalid-after-parse": "error",
   "date-fns/no-date-mutation": "error",
   "date-fns/no-plain-boundary-math": "error",
+  "date-fns/prefer-date-fns-comparison": "error",
 };
 
 export default recommendedRules;
