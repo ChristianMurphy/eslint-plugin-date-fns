@@ -8,6 +8,10 @@ import requireIsvalidAfterParse from "./require-isvalid-after-parse/index.js";
 import noMagicTime from "./no-magic-time/index.js";
 import noDateMutation from "./no-date-mutation/index.js";
 import noPlainBoundaryMath from "./no-plain-boundary-math/index.js";
+import preferDateFnsComparison from "./prefer-date-fns-comparison/index.js";
+import preferDifferenceInUnit from "./prefer-difference-in-unit/index.js";
+import noDateInStringInterpolation from "./no-date-in-string-interpolation/index.js";
+import noNamespaceDateFnsImport from "./no-namespace-date-fns-import/index.js";
 
 /**
  * Registry of all available ESLint rules provided by this plugin.
@@ -23,4 +27,8 @@ export default {
   "no-magic-time": noMagicTime,
   "no-date-mutation": noDateMutation,
   "no-plain-boundary-math": noPlainBoundaryMath,
+  "prefer-date-fns-comparison": preferDateFnsComparison,
+  "prefer-difference-in-unit": preferDifferenceInUnit,
+  "no-date-in-string-interpolation": noDateInStringInterpolation,
+  "no-namespace-date-fns-import": noNamespaceDateFnsImport,
 };

@@ -13,6 +13,10 @@
     "date-fns/prefer-date-fns-from-epoch": "error",
     "date-fns/prefer-iso-literal-over-components": "error",
     "date-fns/require-isvalid-after-parse": "error",
-    "date-fns/no-magic-time": "warn"
+    "date-fns/no-magic-time": "warn",
+    "date-fns/prefer-date-fns-comparison": "error",
+    "date-fns/prefer-difference-in-unit": "warn",
+    "date-fns/no-date-in-string-interpolation": "warn",
+    "date-fns/no-namespace-date-fns-import": "warn"
   }
 }

@@ -25,6 +25,11 @@ const expectedByFixture: Record<string, string> = {
     "date-fns(prefer-iso-literal-over-components)",
   "require-isvalid-after-parse.ts": "date-fns(require-isvalid-after-parse)",
   "no-magic-time.ts": "date-fns(no-magic-time)",
+  "prefer-date-fns-comparison.ts": "date-fns(prefer-date-fns-comparison)",
+  "prefer-difference-in-unit.ts": "date-fns(prefer-difference-in-unit)",
+  "no-date-in-string-interpolation.ts":
+    "date-fns(no-date-in-string-interpolation)",
+  "no-namespace-date-fns-import.ts": "date-fns(no-namespace-date-fns-import)",
 };
 
 interface OxlintDiagnostic {

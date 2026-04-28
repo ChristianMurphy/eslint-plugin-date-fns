@@ -6,6 +6,9 @@ import type { Linter } from "eslint";
  */
 const diagnosticRules: Linter.RulesRecord = {
   "date-fns/no-magic-time": "warn",
+  "date-fns/prefer-difference-in-unit": "warn",
+  "date-fns/no-date-in-string-interpolation": "warn",
+  "date-fns/no-namespace-date-fns-import": "warn",
 };
 
 export default diagnosticRules;
